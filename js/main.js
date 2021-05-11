@@ -28,10 +28,11 @@ function init(event) {
             
     // MODEL
     // GEOMETRY
+    let boxGeom = new THREE.BoxGeometry()
     let sphereGeom = new THREE.SphereGeometry(10, 50, 50);
 
     // MATERIAL
-    let texture1 = new THREE.TextureLoader().load("/img/Earth.jpeg");
+    let texture1 = new THREE.TextureLoader().load("/img/elyvisions/tron_ft.png");
     let texture2 = new THREE.TextureLoader().load("/img/elyvisions/tron_bk.png");
     let texture3 = new THREE.TextureLoader().load("/img/elyvisions/tron_up.png");
     let texture4 = new THREE.TextureLoader().load("/img/elyvisions/tron_dn.png");
@@ -60,12 +61,18 @@ function init(event) {
     ];
 
     // MESH & SCENE HIERARCHY
-    let planets = tPlanets.map(texture => new THREE.MeshBasicMaterial({map: texture, side: THREE.DoubleSide})).map(material => new THREE.Mesh(sphereGeom, material));
+    let planets = tPlanets.map(texture => new THREE.MeshBasicMaterial({map: texture})).map(material => new THREE.Mesh(sphereGeom, material));
+
     planets.forEach((planet, index) => {
         planet.position.set(-100 + 40* index, 0, 0);
         scene.add(planet);
     });
 
+    let skybox = new THREE.Mesh(boxGeom, cubeMaterials);
+    skybox.scale.set(1000, 1000, 1000)
+
+    // SCENE HIERARCHY
+    scene.add(skybox);
     // GUI
     gui = new dat.GUI();
     gui.close();
