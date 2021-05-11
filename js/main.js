@@ -5,7 +5,7 @@ import * as dat from "/js/jsm/libs/dat.gui.module.js";
 
 "use strict";
 
-let renderer, scene, camera, mesh, stats, cameraControls, gui;
+let renderer, scene, camera, mesh, stats, cameraControls, gui, planets;
 
 function init(event) {
     // RENDERER ENGINE
@@ -23,21 +23,32 @@ function init(event) {
     let nearPlane = 0.1;
     let farPlane = 10000.0;
     camera = new THREE.PerspectiveCamera(fovy, aspectRatio, nearPlane, farPlane);
-    camera.position.set(0, 0, 3);
+    camera.position.set(0, 0, 500);
     cameraControls = new OrbitControls(camera, renderer.domElement);
             
     // MODEL
-    //  Cube
-    let geometry = new THREE.BoxGeometry();
+    // GEOMETRY
+    let sphereGeom = new THREE.SphereGeometry(10, 50, 50);
 
     // MATERIAL
-    let texture1 = new THREE.TextureLoader().load("/img/elyvisions/tron_ft.png");
+    let texture1 = new THREE.TextureLoader().load("/img/Earth.jpeg");
     let texture2 = new THREE.TextureLoader().load("/img/elyvisions/tron_bk.png");
     let texture3 = new THREE.TextureLoader().load("/img/elyvisions/tron_up.png");
     let texture4 = new THREE.TextureLoader().load("/img/elyvisions/tron_dn.png");
     let texture5 = new THREE.TextureLoader().load("/img/elyvisions/tron_rt.png");
     let texture6 = new THREE.TextureLoader().load("/img/elyvisions/tron_lf.png");
 
+    let tPlanets = [
+        new THREE.TextureLoader().load("/img/Sun.png"),
+        new THREE.TextureLoader().load("/img/Mercury.jpeg"),
+        new THREE.TextureLoader().load("/img/Venus.jpeg"),
+        new THREE.TextureLoader().load("/img/Earth.jpeg"),
+        new THREE.TextureLoader().load("/img/Mars.jpeg"),
+        new THREE.TextureLoader().load("/img/Jupiter.jpeg"),
+        new THREE.TextureLoader().load("/img/Saturn.jpeg"),
+        new THREE.TextureLoader().load("/img/Uranus.jpeg"),
+        new THREE.TextureLoader().load("/img/Neptune.jpeg")
+    ];
     
     let cubeMaterials = [
         new THREE.MeshBasicMaterial({map: texture1, side: THREE.DoubleSide}),
@@ -48,14 +59,12 @@ function init(event) {
         new THREE.MeshBasicMaterial({map: texture6, side: THREE.DoubleSide})
     ];
 
-    // let material = new THREE.MeshBasicMaterial({map: texture, side: THREE.DoubleSide});
-
-    // MESH
-    mesh = new THREE.Mesh(geometry, cubeMaterials);
-    mesh.scale.set(1000, 1000, 1000)
-
-    // SCENE HIERARCHY
-    scene.add(mesh);
+    // MESH & SCENE HIERARCHY
+    let planets = tPlanets.map(texture => new THREE.MeshBasicMaterial({map: texture, side: THREE.DoubleSide})).map(material => new THREE.Mesh(sphereGeom, material));
+    planets.forEach((planet, index) => {
+        planet.position.set(-100 + 40* index, 0, 0);
+        scene.add(planet);
+    });
 
     // GUI
     gui = new dat.GUI();
