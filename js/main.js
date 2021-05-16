@@ -5,9 +5,6 @@ import * as dat from "/js/jsm/libs/dat.gui.module.js";
 
 "use strict";
 
-let renderer, scene, camera, mesh, stats, cameraControls, gui, earth;
-
-
 class planeta extends THREE.Mesh{
     constructor(radius, textureRoute, rot, tras, posX, posY, posZ){
         super();
@@ -33,6 +30,8 @@ class planeta extends THREE.Mesh{
     }
 }
 
+let renderer, scene, camera, mesh, stats, cameraControls, gui, planets;
+
 function init(event) {
     // RENDERER ENGINE
     renderer = new THREE.WebGLRenderer({antialias: true});
@@ -49,12 +48,13 @@ function init(event) {
     let nearPlane = 0.1;
     let farPlane = 10000.0;
     camera = new THREE.PerspectiveCamera(fovy, aspectRatio, nearPlane, farPlane);
-    camera.position.set(0, 0, 200);
+    camera.position.set(0, 0, 500);
     cameraControls = new OrbitControls(camera, renderer.domElement);
             
     // MODEL
-    //  Cube
-    let geometry = new THREE.BoxGeometry(10000,10000,10000);
+    // GEOMETRY
+    let boxGeom = new THREE.BoxGeometry()
+    let sphereGeom = new THREE.SphereGeometry(10, 50, 50);
 
     // MATERIAL
     let texture1 = new THREE.TextureLoader().load("/img/space.jpeg");
@@ -64,7 +64,18 @@ function init(event) {
     let texture4 = new THREE.TextureLoader().load("/img/elyvisions/tron_dn.png");
     let texture5 = new THREE.TextureLoader().load("/img/elyvisions/tron_rt.png");
     let texture6 = new THREE.TextureLoader().load("/img/elyvisions/tron_lf.png");
-    */
+*/
+    let tPlanets = [
+        new THREE.TextureLoader().load("/img/Sun.png"),
+        new THREE.TextureLoader().load("/img/Mercury.jpeg"),
+        new THREE.TextureLoader().load("/img/Venus.jpeg"),
+        new THREE.TextureLoader().load("/img/Earth.jpeg"),
+        new THREE.TextureLoader().load("/img/Mars.jpeg"),
+        new THREE.TextureLoader().load("/img/Jupiter.jpeg"),
+        new THREE.TextureLoader().load("/img/Saturn.jpeg"),
+        new THREE.TextureLoader().load("/img/Uranus.jpeg"),
+        new THREE.TextureLoader().load("/img/Neptune.jpeg")
+    ];
     
     let cubeMaterials = [
         new THREE.MeshBasicMaterial({map: texture1, side: THREE.DoubleSide}),
@@ -75,12 +86,22 @@ function init(event) {
         new THREE.MeshBasicMaterial({map: texture1, side: THREE.DoubleSide})
     ];
 
-    // let material = new THREE.MeshBasicMaterial({map: texture, side: THREE.DoubleSide});
+    // MESH & SCENE HIERARCHY
+    let planets = tPlanets.map(texture => new THREE.MeshBasicMaterial({map: texture})).map(material => new THREE.Mesh(sphereGeom, material));
 
-    // MESH
-    mesh = new THREE.Mesh(geometry, cubeMaterials);
-    
+    planets.forEach((planet, index) => {
+        planet.position.set(-100 + 40* index, 0, 0);
+        scene.add(planet);
+    });
 
+    let skybox = new THREE.Mesh(boxGeom, cubeMaterials);
+    skybox.scale.set(1000, 1000, 1000)
+
+    // SCENE HIERARCHY
+    scene.add(skybox);
+
+
+    // OPCION PARA LOS PLANETAS -- DATOS REALES ESCALADOS
 
     //SOL
     new planeta(109, "/img/Sun.png", 0.03333, 0, 0, 0, 0);
@@ -113,9 +134,8 @@ function init(event) {
     //Neptuno
     new planeta(3.88, "/img/Neptune.jpeg", .1823, 0.006, 30.20, 0 ,0);
 
-    // SCENE HIERARCHY
-    scene.add(mesh);
-    
+
+
 
     // GUI
     gui = new dat.GUI();
