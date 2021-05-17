@@ -12,7 +12,7 @@ class planeta extends THREE.Mesh{
         console.log(textureRoute)
        // let texture1 = new THREE.TextureLoader().load("img/Earth.jpeg");
 
-       var Geometry = new THREE.SphereGeometry(radius, 32, 32);
+       var Geometry = new THREE.SphereGeometry(radius/2, 32, 32);
         const loader = new THREE.TextureLoader();
         loader.load(textureRoute, (texture) => {
         let planetMaterial = new THREE.MeshBasicMaterial({
@@ -20,7 +20,7 @@ class planeta extends THREE.Mesh{
         });
         let planet = new THREE.Mesh(Geometry, planetMaterial);
         
-        planet.position.x = posX*350;
+        planet.position.x = posX*350/2;
         planet.position.y = posY;
         planet.position.z = posZ;
         
@@ -87,15 +87,16 @@ function init(event) {
     ];
 
     // MESH & SCENE HIERARCHY
+    /*
     let planets = tPlanets.map(texture => new THREE.MeshBasicMaterial({map: texture})).map(material => new THREE.Mesh(sphereGeom, material));
 
     planets.forEach((planet, index) => {
         planet.position.set(-100 + 40* index, 0, 0);
         scene.add(planet);
     });
-
+*/
     let skybox = new THREE.Mesh(boxGeom, cubeMaterials);
-    skybox.scale.set(1000, 1000, 1000)
+    skybox.scale.set(10000, 10000, 10000)
 
     // SCENE HIERARCHY
     scene.add(skybox);
@@ -131,8 +132,8 @@ function init(event) {
     //Urano
     new planeta(4, "/img/Uranus Planet.jpeg", .229, 0.012, 19.14, 0 ,0);
 
-    //Neptuno
-    new planeta(3.88, "/img/Neptune.jpeg", .1823, 0.006, 30.20, 0 ,0);
+    //Neptuno la distancia real debería de ser 30.20 pero se sale del skybox
+    new planeta(3.88, "/img/Neptune.jpeg", .1823, 0.006, 20.20, 0 ,0);
 
 
 
