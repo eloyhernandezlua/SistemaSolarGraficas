@@ -186,7 +186,7 @@ function renderLoop() {
 
 function updateScene() {
     for(let p in planets){
-        planets[p].rotateY(m*planets[p].rot)
+        planets[p].rotation.y += Math.PI / 180 * planets[p].rot;
     }
     m+=.00001; 
 }
