@@ -9,28 +9,27 @@ class planeta extends THREE.Mesh{
     constructor(radius, textureRoute, rot, tras, posX, posY, posZ){
         super();
 
-        console.log(textureRoute)
+        //console.log(textureRoute)
        // let texture1 = new THREE.TextureLoader().load("img/Earth.jpeg");
 
-       var Geometry = new THREE.SphereGeometry(radius/2, 32, 32);
+       this.geometry = new THREE.SphereGeometry(radius/2, 32, 32);
         const loader = new THREE.TextureLoader();
         loader.load(textureRoute, (texture) => {
-        let planetMaterial = new THREE.MeshBasicMaterial({
+        this.material = new THREE.MeshBasicMaterial({
             map: texture,
         });
-        let planet = new THREE.Mesh(Geometry, planetMaterial);
+
+        this.position.x = posX*350/2;
+        this.position.y = posY;
+        this.position.z = posZ;
         
-        planet.position.x = posX*350/2;
-        planet.position.y = posY;
-        planet.position.z = posZ;
-        
-        scene.add(planet);
+        //scene.add();
         
         });
     }
 }
 
-let renderer, scene, camera, mesh, stats, cameraControls, gui, planets;
+let renderer, scene, camera, mesh, stats, cameraControls, gui, planets, sol, mercurio, venus, tierra, marte, jupiter, saturno, urano, neptuno;
 
 function init(event) {
     // RENDERER ENGINE
@@ -105,42 +104,59 @@ function init(event) {
     // OPCION PARA LOS PLANETAS -- DATOS REALES ESCALADOS
 
     //SOL
-    new planeta(109, "/img/Sun.png", 0.03333, 0, 0, 0, 0);
+    sol = new planeta(109, "/img/Sun.png", 0.03333, 0, 0, 0, 0);
+    scene.add(sol);
 
     //Mercurio
-
-    new planeta(0.383, "img/Mercury.jpeg", 1.6, 4.14, 0.38, 0, 0);
+    mercurio = new planeta(0.383, "img/Mercury.jpeg", 1.6, 4.14, 0.38, 0, 0);
+    scene.add(mercurio);
 
     //Venus
+    venus = new planeta(.95, "/img/Venus.jpeg", 1.78, 1.6, 0.72, 0 ,0);
+    scene.add(venus);
 
-    new planeta(.95, "/img/Venus.jpeg", 1.78, 1.6, 0.72, 0 ,0);
-
-    //Tierra
-      
-    new planeta(1, "/img/Earth.jpeg", 1, 1, 1, 0, 0);
-    
+    //Tierra 
+    tierra = new planeta(1, "/img/Earth.jpeg", 1, 1, 1, 0, 0);
+    scene.add(tierra); 
 
     //Marte
-    new planeta(.533, "/img/Mars.jpeg", 0.8082, 0.53, 1.52, 0 ,0);
+    marte = new planeta(.533, "/img/Mars.jpeg", 0.8082, 0.53, 1.52, 0 ,0);
+    scene.add(marte);
 
     //Júpiter
-    new planeta(11.21, "/img/Jupiter.jpeg", 0.439, 0.084, 5.20, 0 ,0);
+    jupiter = new planeta(11.21, "/img/Jupiter.jpeg", 0.439, 0.084, 5.20, 0 ,0);
+    scene.add(jupiter);
 
     //Saturno
-    new planeta(8.52, "/img/Saturn Planet.jpeg", .3254, 0.034, 9.58, 0 ,0);
+    saturno = new planeta(8.52, "/img/Saturn Planet.jpeg", .3254, 0.034, 9.58, 0 ,0);
+    scene.add(saturno);
 
     //Urano
-    new planeta(4, "/img/Uranus Planet.jpeg", .229, 0.012, 19.14, 0 ,0);
+    urano = new planeta(4, "/img/Uranus Planet.jpeg", .229, 0.012, 19.14, 0 ,0);
+    scene.add(urano);
 
     //Neptuno la distancia real debería de ser 30.20 pero se sale del skybox
-    new planeta(3.88, "/img/Neptune.jpeg", .1823, 0.006, 20.20, 0 ,0);
-
+    neptuno = new planeta(3.88, "/img/Neptune.jpeg", .1823, 0.006, 20.20, 0 ,0);
+    scene.add(neptuno);
 
 
 
     // GUI
     gui = new dat.GUI();
     gui.close();
+
+    let closeUps = {
+
+        cuTierra: function(){
+            camera.lookAt(175, 0, 0);
+            camera.position.set(185, 0, 0);
+            console.log(camera.position)
+        }
+    }
+
+    //gui.addFolder()
+    gui.add(closeUps, "cuTierra").name("Tierra").listen().onChange(function(value) {
+    });
 
     // SETUP STATS
     stats = new Stats();
