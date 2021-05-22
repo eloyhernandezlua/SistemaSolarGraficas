@@ -6,8 +6,13 @@ import * as dat from "/js/jsm/libs/dat.gui.module.js";
 "use strict";
 
 class planeta extends THREE.Mesh{
-    constructor(radius, textureRoute, rot, tras, posX, posY, posZ){
+    constructor(radius, textureRoute, rot, tras, posX, posY, posZ, nombre){
         super();
+        this.position.x = posX*350/2;
+        this.position.y = posY;
+        this.position.z = posZ;
+        this.name = nombre;
+        this.rot = rot;
 
         //console.log(textureRoute)
        // let texture1 = new THREE.TextureLoader().load("img/Earth.jpeg");
@@ -18,18 +23,13 @@ class planeta extends THREE.Mesh{
         this.material = new THREE.MeshBasicMaterial({
             map: texture,
         });
-
-        this.position.x = posX*350/2;
-        this.position.y = posY;
-        this.position.z = posZ;
-        
-        //scene.add();
         
         });
     }
 }
 
 let renderer, scene, camera, mesh, stats, cameraControls, gui, planets, sol, mercurio, venus, tierra, marte, jupiter, saturno, urano, neptuno;
+var m = 0;
 
 function init(event) {
     // RENDERER ENGINE
@@ -104,42 +104,45 @@ function init(event) {
     // OPCION PARA LOS PLANETAS -- DATOS REALES ESCALADOS
 
     //SOL
-    sol = new planeta(109, "/img/Sun.png", 0.03333, 0, 0, 0, 0);
+    sol = new planeta(109, "/img/Sun.png", 0.03333, 0, 0, 0, 0, "sol");
     scene.add(sol);
 
     //Mercurio
-    mercurio = new planeta(0.383, "img/Mercury.jpeg", 1.6, 4.14, 0.38, 0, 0);
+    mercurio = new planeta(0.383, "img/Mercury.jpeg", 1.6, 4.14, 0.38, 0, 0, "mercurio");
     scene.add(mercurio);
 
     //Venus
-    venus = new planeta(.95, "/img/Venus.jpeg", 1.78, 1.6, 0.72, 0 ,0);
+    venus = new planeta(.95, "/img/Venus.jpeg", 1.78, 1.6, 0.72, 0 ,0, "venus");
     scene.add(venus);
 
     //Tierra 
-    tierra = new planeta(1, "/img/Earth.jpeg", 1, 1, 1, 0, 0);
+    tierra = new planeta(1, "/img/Earth.jpeg", 1, 1, 1, 0, 0, "tierra");
     scene.add(tierra); 
 
     //Marte
-    marte = new planeta(.533, "/img/Mars.jpeg", 0.8082, 0.53, 1.52, 0 ,0);
+    marte = new planeta(.533, "/img/Mars.jpeg", 0.8082, 0.53, 1.52, 0 ,0, "marte");
     scene.add(marte);
 
     //Júpiter
-    jupiter = new planeta(11.21, "/img/Jupiter.jpeg", 0.439, 0.084, 5.20, 0 ,0);
+    jupiter = new planeta(11.21, "/img/Jupiter.jpeg", 0.439, 0.084, 5.20, 0 ,0, "jupiter");
     scene.add(jupiter);
 
     //Saturno
-    saturno = new planeta(8.52, "/img/Saturn Planet.jpeg", .3254, 0.034, 9.58, 0 ,0);
+    saturno = new planeta(8.52, "/img/Saturn Planet.jpeg", .3254, 0.034, 9.58, 0 ,0, "saturno");
     scene.add(saturno);
 
     //Urano
-    urano = new planeta(4, "/img/Uranus Planet.jpeg", .229, 0.012, 19.14, 0 ,0);
+    urano = new planeta(4, "/img/Uranus Planet.jpeg", .229, 0.012, 19.14, 0 ,0, "urano");
     scene.add(urano);
 
     //Neptuno la distancia real debería de ser 30.20 pero se sale del skybox
-    neptuno = new planeta(3.88, "/img/Neptune.jpeg", .1823, 0.006, 20.20, 0 ,0);
+    neptuno = new planeta(3.88, "/img/Neptune.jpeg", .1823, 0.006, 20.20, 0 ,0, "neptuno");
     scene.add(neptuno);
 
+    let worldAxes = new THREE.AxesHelper(100000);
+    scene.add(worldAxes);
 
+    planets = [sol, mercurio, venus, tierra, marte, jupiter, saturno, urano, neptuno]
 
     // GUI
     gui = new dat.GUI();
@@ -148,16 +151,20 @@ function init(event) {
     let closeUps = {
 
         cuTierra: function(){
-            camera.lookAt(175, 0, 0);
-            camera.position.set(185, 0, 0);
-            console.log(camera.position)
+            for (let p in planets){
+                planets[p].position.x -= tierra.position.x
+                //p.position.x += tierra.position.x;
+            }
+            camera.position.z = 3;
         }
     }
 
     //gui.addFolder()
     gui.add(closeUps, "cuTierra").name("Tierra").listen().onChange(function(value) {
     });
-
+    gui.add(worldAxes, "visible").name("World Axes").setValue(false).listen().onChange(function(value) {
+ 
+    });
     // SETUP STATS
     stats = new Stats();
     stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
@@ -165,6 +172,7 @@ function init(event) {
 
     // DRAW SCENE IN A RENDER LOOP (ANIMATION)
     renderLoop();
+
 }
 
 function renderLoop() {
@@ -177,7 +185,10 @@ function renderLoop() {
 }
 
 function updateScene() {
-    
+    for(let p in planets){
+        planets[p].rotateY(m*planets[p].rot)
+    }
+    m+=.00001; 
 }
 
 // EVENT LISTENERS & HANDLERS
