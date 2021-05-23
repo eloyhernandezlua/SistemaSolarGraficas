@@ -294,12 +294,11 @@ function updateScene() {
 
     //translation
     if(falgTras){
-        for(let p in planets){
-            planets[p].rotation.y += Math.PI / 180 * planets[p].rot;
-    
-    
-            planets[p].position.x = planets[p].posX * Math.cos(t) + planets[p].posZ * Math.sin(t);
-            planets[p].position.z =  planets[p].posZ* Math.cos(t) - planets[p].posX * Math.sin(t);
+        for(let p in planets){  
+            if(p != 0 ){
+                planets[p].position.x = planets[p].posX * Math.cos(t*planets[p].tras) + planets[p].posZ * Math.sin(t*planets[p].tras);
+                planets[p].position.z =  planets[p].posZ* Math.cos(t*planets[p].tras) - planets[p].posX * Math.sin(t*planets[p].tras);
+            }
         }
         if (follow != 0){
             camera.position.set(planets[follow].position.x, planets[follow].position.y, planets[follow].position.z + camera_dif);
