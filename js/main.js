@@ -32,6 +32,7 @@ class planeta extends THREE.Mesh{
 }
 
 let renderer, scene, camera, mesh, stats, cameraControls, gui, planets, sol, mercurio, venus, tierra, marte, jupiter, saturno, urano, neptuno;
+let flagRot, falgTras
 var t = 0;
 
 function init(event) {
@@ -52,6 +53,7 @@ function init(event) {
     camera = new THREE.PerspectiveCamera(fovy, aspectRatio, nearPlane, farPlane);
     camera.position.set(0, 0, 500);
     cameraControls = new OrbitControls(camera, renderer.domElement);
+    cameraControls.enableDamping = true;
             
     // MODEL
     // GEOMETRY
@@ -154,20 +156,101 @@ function init(event) {
     let closeUps = {
 
         cuTierra: function(){
-            for (let p in planets){
-                planets[p].position.x -= tierra.position.x
-                //p.position.x += tierra.position.x;
-            }
-            camera.position.z = 3;
-        }
+            camera.position.set(tierra.posX,tierra.posY, tierra.posZ+3);
+            camera.up = new THREE.Vector3(0,1,0);
+            camera.lookAt(new THREE.Vector3(tierra.posX,tierra.posY,tierra.posZ));
+            cameraControls.target.set(tierra.posX,tierra.posY,tierra.posZ);
+            
+        },
+        cuMercurio: function(){
+            camera.position.set(mercurio.posX,mercurio.posY, mercurio.posZ+3);
+            camera.up = new THREE.Vector3(0,1,0);
+            camera.lookAt(new THREE.Vector3(mercurio.posX,mercurio.posY,mercurio.posZ));
+            cameraControls.target.set(mercurio.posX,mercurio.posY,mercurio.posZ);
+            
+        },
+        cuVenus: function(){
+            camera.position.set(venus.posX,venus.posY, venus.posZ+3);
+            camera.up = new THREE.Vector3(0,1,0);
+            camera.lookAt(new THREE.Vector3(venus.posX,venus.posY,venus.posZ));
+            cameraControls.target.set(venus.posX,venus.posY,venus.posZ);
+            
+        },
+        cuMarte: function(){
+            camera.position.set(marte.posX,marte.posY, marte.posZ+3);
+            camera.up = new THREE.Vector3(0,1,0);
+            camera.lookAt(new THREE.Vector3(marte.posX,marte.posY,marte.posZ));
+            cameraControls.target.set(marte.posX,marte.posY,marte.posZ);
+            
+        },
+        cuJupiter: function(){
+            camera.position.set(jupiter.posX,jupiter.posY, jupiter.posZ+20);
+            camera.up = new THREE.Vector3(0,1,0);
+            camera.lookAt(new THREE.Vector3(jupiter.posX,jupiter.posY,jupiter.posZ));
+            cameraControls.target.set(jupiter.posX,jupiter.posY,jupiter.posZ);
+            
+        },
+        cuSaturno: function(){
+            camera.position.set(saturno.posX,saturno.posY, saturno.posZ+20);
+            camera.up = new THREE.Vector3(0,1,0);
+            camera.lookAt(new THREE.Vector3(saturno.posX,saturno.posY,saturno.posZ));
+            cameraControls.target.set(saturno.posX,saturno.posY,saturno.posZ);
+            
+        },
+        cuUrano: function(){
+            camera.position.set(urano.posX,urano.posY, urano.posZ+10);
+            camera.up = new THREE.Vector3(0,1,0);
+            camera.lookAt(new THREE.Vector3(urano.posX,urano.posY,urano.posZ));
+            cameraControls.target.set(urano.posX,urano.posY,urano.posZ);
+            
+        },
+        cuNeptuno: function(){
+            camera.position.set(neptuno.posX,neptuno.posY, neptuno.posZ+5);
+            camera.up = new THREE.Vector3(0,1,0);
+            camera.lookAt(new THREE.Vector3(neptuno.posX,neptuno.posY,neptuno.posZ));
+            cameraControls.target.set(neptuno.posX,neptuno.posY,neptuno.posZ);
+            
+        },
+
     }
 
-    //gui.addFolder()
-    gui.add(closeUps, "cuTierra").name("Tierra").listen().onChange(function(value) {
-    });
-    gui.add(worldAxes, "visible").name("World Axes").setValue(false).listen().onChange(function(value) {
+    let moves = {
+        rota: false,
+        trasla: false
+    }
+    let axes = gui.addFolder("Axes");
+    axes.add(worldAxes, "visible").name("World Axes").setValue(false).listen().onChange(function(value) {
  
     });
+
+    let acercamiento = gui.addFolder("Vista")
+    acercamiento.add(closeUps, "cuTierra").name("Tierra").listen().onChange(function(value) {
+    });
+    acercamiento.add(closeUps, "cuMercurio").name("Mercurio").listen().onChange(function(value) {
+    });
+    acercamiento.add(closeUps, "cuVenus").name("Venus").listen().onChange(function(value) {
+    });
+    acercamiento.add(closeUps, "cuMarte").name("Marte").listen().onChange(function(value) {
+    });
+    acercamiento.add(closeUps, "cuJupiter").name("Júpiter").listen().onChange(function(value) {
+    });
+    acercamiento.add(closeUps, "cuSaturno").name("Saturno").listen().onChange(function(value) {
+    });
+    acercamiento.add(closeUps, "cuUrano").name("Urano").listen().onChange(function(value) {
+    });
+    acercamiento.add(closeUps, "cuNeptuno").name("Neptuno").listen().onChange(function(value) {
+    });
+    
+
+    let movements = gui.addFolder("Movimientos");
+    movements.add(moves, "rota").name("Rotation").setValue(false).listen().onChange(function(value) {
+        flagRot = value;
+    });
+    movements.add(moves, "trasla").name("Traslation").setValue(false).listen().onChange(function(value) {
+        falgTras = value;
+    });
+
+
     // SETUP STATS
     stats = new Stats();
     stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
@@ -190,15 +273,26 @@ function renderLoop() {
 
 function updateScene() {
     //console.log(tierra.position.x)
-    for(let p in planets){
-        planets[p].rotation.y += Math.PI / 180 * planets[p].rot;
+    cameraControls.update();
 
-            // planets[p].position.x = Math.sin(t*planets[p].tras) + planets[p].position.x;
-            // planets[p].position.z = Math.sin(t*planets[p].tras) + planets[p].position.z;
-
-        planets[p].position.x = planets[p].posX * Math.cos(t) + planets[p].posZ * Math.sin(t);
-        planets[p].position.z =  planets[p].posZ* Math.cos(t) - planets[p].posX * Math.sin(t);
+    //rotation
+    if (flagRot){
+        for(let p in planets){
+            planets[p].rotation.y += Math.PI / 180 * planets[p].rot;
+        }
     }
+
+    //translation
+    if(falgTras){
+        for(let p in planets){
+            planets[p].rotation.y += Math.PI / 180 * planets[p].rot;
+    
+    
+            planets[p].position.x = planets[p].posX * Math.cos(t) + planets[p].posZ * Math.sin(t);
+            planets[p].position.z =  planets[p].posZ* Math.cos(t) - planets[p].posX * Math.sin(t);
+        }
+    }
+
 
     t+= .01
 }
