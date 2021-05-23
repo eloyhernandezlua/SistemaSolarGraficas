@@ -22,12 +22,25 @@ class planeta extends THREE.Mesh{
 
        this.geometry = new THREE.SphereGeometry(radius/2, 32, 32);
         const loader = new THREE.TextureLoader();
-        loader.load(textureRoute, (texture) => {
-        this.material = new THREE.MeshBasicMaterial({
-            map: texture,
-        });
+
+        if (nombre != "sol"){
+            loader.load(textureRoute, (texture) => {
+                this.material = new THREE.MeshStandardMaterial({
+                    map: texture,
+                });
+                this.receiveShadow = false;
+                this.castShadow = true;
+                
+                });
+        }else{
+            loader.load(textureRoute, (texture) => {
+                this.material = new THREE.MeshBasicMaterial({
+                    map: texture,
+                });
+
+                });
+        }
         
-        });
     }
 }
 
@@ -106,6 +119,14 @@ function init(event) {
 
     // SCENE HIERARCHY
     scene.add(skybox);
+
+    //LIGHT
+    let light = new THREE.PointLight( new THREE.Color("white"), 1.5, 10000, 2);
+    light.position.set( 0, 0, 0 );
+    light.castShadow = true;
+    scene.add( light );
+    let pointLightHelper = new THREE.PointLightHelper( light, 100 );
+    scene.add(pointLightHelper);
 
 
     // OPCION PARA LOS PLANETAS -- DATOS REALES ESCALADOS
@@ -228,10 +249,14 @@ function init(event) {
         rota: false,
         trasla: false
     }
-    let axes = gui.addFolder("Axes");
-    axes.add(worldAxes, "visible").name("World Axes").setValue(false).listen().onChange(function(value) {
+    let helpers = gui.addFolder("Helpers");
+    helpers.add(worldAxes, "visible").name("World Axes").setValue(false).listen().onChange(function(value) {
  
     });
+    helpers.add(pointLightHelper, "visible").name("Point Light").setValue(false).listen().onChange(function(value) {
+ 
+    });
+    
 
     let acercamiento = gui.addFolder("Vista")
     acercamiento.add(closeUps, "cuTierra").name("Tierra").listen().onChange(function(value) {
@@ -307,7 +332,7 @@ function updateScene() {
             cameraControls.target.set(planets[follow].position.x, planets[follow].position.y, planets[follow].position.z);
         }
     }else{
-        follow =0;
+        //follow =0;
     }
 
 
