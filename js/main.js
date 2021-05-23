@@ -13,7 +13,10 @@ class planeta extends THREE.Mesh{
         this.position.z = posZ;
         this.name = nombre;
         this.rot = rot;
-
+        this.tras = tras;
+        this.posX = posX*350/2;
+        this.posY = posY;
+        this.posZ = posZ;
         //console.log(textureRoute)
        // let texture1 = new THREE.TextureLoader().load("img/Earth.jpeg");
 
@@ -29,7 +32,7 @@ class planeta extends THREE.Mesh{
 }
 
 let renderer, scene, camera, mesh, stats, cameraControls, gui, planets, sol, mercurio, venus, tierra, marte, jupiter, saturno, urano, neptuno;
-var m = 0;
+var t = 0;
 
 function init(event) {
     // RENDERER ENGINE
@@ -173,6 +176,7 @@ function init(event) {
     // DRAW SCENE IN A RENDER LOOP (ANIMATION)
     renderLoop();
 
+
 }
 
 function renderLoop() {
@@ -185,10 +189,18 @@ function renderLoop() {
 }
 
 function updateScene() {
+    //console.log(tierra.position.x)
     for(let p in planets){
         planets[p].rotation.y += Math.PI / 180 * planets[p].rot;
+
+            // planets[p].position.x = Math.sin(t*planets[p].tras) + planets[p].position.x;
+            // planets[p].position.z = Math.sin(t*planets[p].tras) + planets[p].position.z;
+
+        planets[p].position.x = planets[p].posX * Math.cos(t) + planets[p].posZ * Math.sin(t);
+        planets[p].position.z =  planets[p].posZ* Math.cos(t) - planets[p].posX * Math.sin(t);
     }
-    m+=.00001; 
+
+    t+= .01
 }
 
 // EVENT LISTENERS & HANDLERS
