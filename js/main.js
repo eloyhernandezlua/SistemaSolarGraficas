@@ -1,6 +1,8 @@
 import * as THREE from "/build/three.module.js";
 import Stats from "/js/jsm/libs/stats.module.js";
 import {OrbitControls} from "/js/jsm/controls/OrbitControls.js";
+import {OBJLoader} from "/js/jsm/loaders/OBJLoader.js";
+import {MTLLoader} from "/js/jsm/loaders/MTLLoader.js";
 import * as dat from "/js/jsm/libs/dat.gui.module.js";
 
 "use strict";
@@ -22,16 +24,58 @@ class planeta extends THREE.Mesh{
 
        this.geometry = new THREE.SphereGeometry(radius/2, 32, 32);
         const loader = new THREE.TextureLoader();
-
+        const mtlLoader = new MTLLoader();
+        const objLoader = new OBJLoader();
+        var flag = false;
+        var mtl; 
+        var obj;
         if (nombre != "sol"){
-            loader.load(textureRoute, (texture) => {
-                this.material = new THREE.MeshStandardMaterial({
+            switch(nombre){
+                case "tierra":
+                    mtl = '/mtl/earth.mtl';
+                    obj = '/mtl/earth.obj';
+                    break;
+                case "saturno":
+                    mtl = '/mtl/saturno.mtl';
+                    obj = '/obj/saturno.obj';
+                    break;
+                case "neptuno":
+                    mtl = '/mtl/neptuno.mtl';
+                    obj = '/obj/neptuno.obj';
+                    break;
+                case "jupiter":
+                    mtl = '/mtl/jupiter.mtl';
+                    obj = '/obj/jupiter.obj';
+                    break;
+                case "marte":
+                    mtl = '/mtl/marte.mtl';
+                    obj = '/obj/marte.obj';
+                    break;
+                case "venus":
+                    mtl = '/mtl/venus.mtl';
+                    obj = '/obj/venus.obj';
+                    break;
+                default:
+                    flag = false; 
+                    
+
+            }
+            if (flag){
+                mtlLoader.load(mtl,  function(materials) {
+                    materials.preload();
+                    objLoader.setMaterials(materials);
+                    objLoader.load(obj, function (object) {
+                        mesh = object;
+                    });
+                });
+            }else{
+                loader.load(textureRoute, (texture) => {
+                    this.material = new THREE.MeshStandardMaterial({
                     map: texture,
                 });
                 this.receiveShadow = false;
                 this.castShadow = true;
-                
-                });
+                });}
         }else{
             loader.load(textureRoute, (texture) => {
                 this.material = new THREE.MeshBasicMaterial({
@@ -39,10 +83,11 @@ class planeta extends THREE.Mesh{
                 });
 
                 });
-        }
-        
+        } 
     }
 }
+
+
 
 let renderer, scene, camera, mesh, stats, cameraControls, gui, planets, sol, mercurio, venus, tierra, marte, jupiter, saturno, urano, neptuno;
 let flagRot, falgTras
