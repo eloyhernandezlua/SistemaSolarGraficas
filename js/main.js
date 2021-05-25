@@ -10,6 +10,7 @@ class Composite extends THREE.Group {
         super();
     }
 }
+
 class Primitive extends THREE.Mesh {
     constructor() {
         super();
@@ -48,10 +49,10 @@ class FlatArrow extends Primitive {
 class OrbitalCamera extends THREE.PerspectiveCamera {
     constructor(fovy, aspectRatio, nearPlane, farPlane) {
         super(fovy, aspectRatio, nearPlane, farPlane);
-        this.target = new THREE.Vector3(0, 0, 0);
-        this.position.set(new THREE.Vector3(0, 0, 10));
-        this.lookAt(this.target);
-        this.r = this.position.distanceTo(this.target);
+        // this.target = new THREE.Vector3(0, 0, 0);
+        // this.position.set(new THREE.Vector3(0, 0, 10));
+        // this.lookAt(this.target);
+        // this.r = this.position.distanceTo(this.target);
     }
 
     focusObj(obj) {
@@ -70,10 +71,16 @@ class OrbitalCamera extends THREE.PerspectiveCamera {
         this.lookAt(this.target);
     }
 
-    orbit(obj, theta) {
-        this.lookAt(this.target);
+    orbit(theta) {
         this.r = this.position.distanceTo(this.target);
-        this.position.set(this.r*Math.sin(theta), this.position.y, this.r*Math.cos(theta));
+        this.position.set(this.target.x + (this.r * Math.sin(theta)), this.target.y,this.target.z + (this.r * Math.cos(theta)));
+        this.lookAt(this.target);
+    }
+}
+
+class Sphere extends Primitive {
+    constructor(radius) {
+        super()
     }
 }
 
@@ -120,7 +127,7 @@ var follow = 0;
 var camera_dif = 0;
 
 // Rotation
-let theta = 0;
+let theta = 0.1;
 
 let multiview = false;
 
@@ -240,16 +247,6 @@ function init(event) {
     scene.add(worldAxes);
 
     planets = [sol, mercurio, venus, tierra, marte, jupiter, saturno, urano, neptuno]
-    // var bbox = new THREE.Box3().setFromObject(planets[3]);
-    // let xbar = (bbox.min.x + bbox.max.x)/2
-    // let ybar = (bbox.min.y + bbox.max.y)/2
-    // let zbar = (bbox.min.z + bbox.max.z)/2
-
-    // let z1 = ((bbox.max.y - ybar) / Math.tan(fovy/2 * Math.PI/ 180)) + bbox.max.z; 
-    // let z2 = ((bbox.max.x - xbar) / Math.tan(fovy/2 * Math.PI/ 180)) + bbox.max.z;
-
-    // camera3.position.set(xbar, ybar, Math.max(z1, z2) * 2);
-    // camera3.lookAt(xbar, ybar, zbar);
     camera3.focusObj(planets[follow]);
 
     // GUI
@@ -457,11 +454,26 @@ function renderLoop() {
 }
 
 function updateScene() {
-    cameraControls.update();
+    // cameraControls.update();
 
     //rotation
-    // camera3.orbit(planets[follow], theta);
-    // theta += 0.01;
+    theta += 0.01;
+
+
+    // let r = camera3.position.distanceTo(camera3.target);
+    // camera3.position.set(camera3.position.x + (r * Math.sin(theta)), camera3.position.y ,camera3.position.z + (r * Math.cos(theta)));
+    // camera3.
+    // camera3.lookAt(planets[3].position.x, planets[3].position.y, planets[3].position.z);
+
+    // this.target = new THREE.Vector3(xbar, ybar, zbar);
+    // camera3.orbit(theta);
+    // camera3.position.x = r * Math.sin(theta);
+    // camera3.position.z = r * Math.cos(theta);
+    // camera3.lookAt(camera3.target)
+    // camera3.position.x = camera3.position.x * Math.cos(theta) - camera3.position.z * Math.sin(theta);
+    // camera3.position.z = camera3.position.z * Math.cos(theta) + camera3.position.x * Math.sin(theta);
+
+
 
 
     if (flagRot){
@@ -483,6 +495,8 @@ function updateScene() {
             // camera.up = new THREE.Vector3(0,1,0);
             // camera.lookAt(new THREE.Vector3(planets[follow].position.x, planets[follow].position.y, planets[follow].position.z));
             // cameraControls.target.set(planets[follow].position.x, planets[follow].position.y, planets[follow].position.z);
+            camera3.focusObj(planets[follow]);
+            camera3.orbit(theta);
         }
     }
     t+= .01
@@ -515,5 +529,10 @@ function updateCard(title, text, link) {
     document.getElementsByClassName("card-title")[0].innerHTML = title;
     document.getElementsByClassName("card-text")[0].innerHTML = text;
     document.getElementsByClassName("card-link")[0].setAttribute("href", link);
+}
+
+// Helpers
+function degreesToRad(degrees) {
+    return degrees / 180 * Math.PI;
 }
 
