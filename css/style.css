@@ -36,13 +36,12 @@ body {
 	flex-direction: column;
 	justify-content: space-between;
 	display: flex;
-	/* transition */
 	opacity: 0;
 	visibility: hidden;
 	transition: 0.5s opacity, 0.5s visibility;
 }
 
-.visible {
+.show-card {
 	opacity: 1;
 	visibility: visible;
 	transition: 0.5s opacity, 0 0.5s visibility;
@@ -82,4 +81,22 @@ body {
     font-weight: bold;
     border-radius: 5em;
     font-size: 1rem;
+}
+
+.view-hud {
+	display: flex;
+	position: absolute;
+	width: 100vw;
+	top:-100%;
+	transition: all 0.4s ease;
+}
+
+.view-hud h1 {
+	width: 50%;
+	color: white;
+	text-align: center;
+}
+
+.show-view-hud {
+	top: 0;
 }

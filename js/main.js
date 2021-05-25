@@ -5,13 +5,47 @@ import * as dat from "/js/jsm/libs/dat.gui.module.js";
 
 "use strict";
 
-class Primitiva extends THREE.Mesh {
+class Composite extends THREE.Group {
+    constructor() {
+        super();
+    }
+}
+class Primitive extends THREE.Mesh {
     constructor() {
         super();
     }
 }
 
-class Planeta extends Primitiva {
+class FlatArrow extends Primitive {
+    constructor() {
+        super();
+        let vertices = [
+            0, 0, 0,
+            0.5, 0, 0.5,
+            0.5, 0, 0.25,
+            0.5, 0, 0,
+            1, 0, 0.25,
+            1, 0, -0.25,
+            0.5, 0, -0.25,
+            0.5, 0, -0.5
+        ];
+        let indices = [
+            0, 3, 1,
+            0, 7, 3,
+            2, 6, 5,
+            2, 5, 4
+        ];
+        this.geometry = new THREE.BufferGeometry();
+        this.geometry.setAttribute(
+        "position",
+        new THREE.Float32BufferAttribute(vertices, 3)
+        );
+        this.geometry.setIndex(indices);
+        this.material = new THREE.MeshBasicMaterial();
+    }
+}
+
+class Planet extends Primitive {
     constructor(radius, textureRoute, rot, tras, posX, posY, posZ, nombre){
         super();
         this.position.x = posX*350/2;
@@ -34,18 +68,22 @@ class Planeta extends Primitiva {
     }
 }
 
-let renderer, scene, camera, mesh, stats, cameraControls, gui, planets, sol, mercurio, venus, tierra, marte, jupiter, saturno, urano, neptuno;
+// GLOBALS
+let renderer, scene, camera, camera2, stats, cameraControls, gui, planets, sol, mercurio, venus, tierra, marte, jupiter, saturno, urano, neptuno;
 let flagRot, falgTras;
 let card; // Access to DOM card;
 var t = 0;
 var follow = 0;
 var camera_dif = 0;
 
+let multiview = false;
+
 function init(event) {
     // RENDERER ENGINE
     renderer = new THREE.WebGLRenderer({antialias: true});
-    renderer.setClearColor(new THREE.Color(0, 0, 0));
+    renderer.setClearColor(new THREE.Color(104, 185, 226));
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setScissorTest(true); // lets renderer to
     document.body.appendChild(renderer.domElement);
 
     // SCENE
@@ -58,8 +96,18 @@ function init(event) {
     let farPlane = 10000.0;
     camera = new THREE.PerspectiveCamera(fovy, aspectRatio, nearPlane, farPlane);
     camera.position.set(0, 0, 500);
+    camera.up.set(0,1,0);
+    camera.lookAt(new THREE.Vector3(0,0,0));
     cameraControls = new OrbitControls(camera, renderer.domElement);
     cameraControls.enableDamping = true;
+
+
+    // CAMERA2 (Top View)
+    aspectRatio = window.innerWidth/2 / window.innerHeight;
+    camera2 = new THREE.PerspectiveCamera(fovy, aspectRatio, nearPlane, farPlane);
+    camera2.position.set(0, 500, 0);
+    camera2.lookAt(new THREE.Vector3(0,0,0));
+    camera2.up.set(0,0,1);
             
     // MODEL
     // GEOMETRY
@@ -95,39 +143,39 @@ function init(event) {
     // OPCION PARA LOS PLANETAS -- DATOS REALES ESCALADOS
 
     //SOL
-    sol = new Planeta(109, "/img/Sun.jpeg", 0.03333, 0, 0, 0, 0, "sol");
+    sol = new Planet(109, "/img/Sun.jpeg", 0.03333, 0, 0, 0, 0, "sol");
     scene.add(sol);
 
     //Mercurio
-    mercurio = new Planeta(0.383, "img/Mercury.jpeg", 1.6, 4.14, 0.38, 0, 0, "mercurio");
+    mercurio = new Planet(0.383, "img/Mercury.jpeg", 1.6, 4.14, 0.38, 0, 0, "mercurio");
     scene.add(mercurio);
 
     //Venus
-    venus = new Planeta(.95, "/img/Venus.jpeg", 1.78, 1.6, 0.72, 0 ,0, "venus");
+    venus = new Planet(.95, "/img/Venus.jpeg", 1.78, 1.6, 0.72, 0 ,0, "venus");
     scene.add(venus);
 
     //Tierra 
-    tierra = new Planeta(1, "/img/Earth.jpeg", 1, 1, 1, 0, 0, "tierra");
+    tierra = new Planet(1, "/img/Earth.jpeg", 1, 1, 1, 0, 0, "tierra");
     scene.add(tierra); 
 
     //Marte
-    marte = new Planeta(.533, "/img/Mars.jpeg", 0.8082, 0.53, 1.52, 0 ,0, "marte");
+    marte = new Planet(.533, "/img/Mars.jpeg", 0.8082, 0.53, 1.52, 0 ,0, "marte");
     scene.add(marte);
 
     //Júpiter
-    jupiter = new Planeta(11.21, "/img/Jupiter.jpeg", 0.439, 0.084, 5.20, 0 ,0, "jupiter");
+    jupiter = new Planet(11.21, "/img/Jupiter.jpeg", 0.439, 0.084, 5.20, 0 ,0, "jupiter");
     scene.add(jupiter);
 
     //Saturno
-    saturno = new Planeta(8.52, "/img/Saturn.jpeg", .3254, 0.034, 9.58, 0 ,0, "saturno");
+    saturno = new Planet(8.52, "/img/Saturn.jpeg", .3254, 0.034, 9.58, 0 ,0, "saturno");
     scene.add(saturno);
 
     //Urano
-    urano = new Planeta(4, "/img/Uranus.jpeg", .229, 0.012, 19.14, 0 ,0, "urano");
+    urano = new Planet(4, "/img/Uranus.jpeg", .229, 0.012, 19.14, 0 ,0, "urano");
     scene.add(urano);
 
     //Neptuno la distancia real debería de ser 30.20 pero se sale del skybox
-    neptuno = new Planeta(3.88, "/img/Neptune.jpeg", .1823, 0.006, 20.20, 0 ,0, "neptuno");
+    neptuno = new Planet(3.88, "/img/Neptune.jpeg", .1823, 0.006, 20.20, 0 ,0, "neptuno");
     scene.add(neptuno);
 
     let worldAxes = new THREE.AxesHelper(100000);
@@ -279,7 +327,32 @@ function init(event) {
 
 function renderLoop() {
     stats.begin();
-    renderer.render(scene, camera); // DRAW SCENE
+
+    if(!multiview) {
+        // CAMERA1
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        // origin, width, height
+        renderer.setViewport(0,0, window.innerWidth, window.innerHeight); 
+        renderer.setScissor(0,0, window.innerWidth, window.innerHeight); 
+        renderer.render(scene, camera);
+    } 
+    else {
+        // CAMERA1
+        camera2.aspect = window.innerWidth/2 / window.innerHeight;
+        camera2.updateProjectionMatrix();
+        renderer.setViewport(0,0, window.innerWidth/2 - 10, window.innerHeight); 
+        renderer.setScissor(0,0, window.innerWidth/2 - 10, window.innerHeight); 
+        renderer.render(scene, camera2);
+
+        //
+        camera.aspect = window.innerWidth/2 / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setViewport(window.innerWidth/2 + 10, 0, window.innerWidth/2 - 10, window.innerHeight);
+        renderer.setScissor(window.innerWidth/2 + 10, 0, window.innerWidth/2 - 10, window.innerHeight);
+        renderer.render(scene, camera);
+    }
+
     updateScene();
     stats.end();
     stats.update();
@@ -326,10 +399,17 @@ window.addEventListener("resize", () => {
     renderer.setSize(window.innerWidth, window.innerHeight);
 }, false);
 
+document.addEventListener("keydown", (ev) => {
+    if(ev.key == " ") {
+        multiview = !multiview;
+        document.getElementsByClassName("view-hud")[0].classList.toggle("show-view-hud");
+    }
+})
+
 document.querySelector(".close").addEventListener("click", toggleCard);
 
 function toggleCard() {
-    card.classList.toggle("visible");
+    card.classList.toggle("show-card");
 }
 
 function updateCard(title, text, link) {
@@ -338,3 +418,4 @@ function updateCard(title, text, link) {
     document.getElementsByClassName("card-text")[0].innerHTML = text;
     document.getElementsByClassName("card-link")[0].setAttribute("href", link);
 }
+
