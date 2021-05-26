@@ -452,7 +452,6 @@ function updateScene() {
     }
 
     camera.followSun(solarSystem.focused);
-
 }
 
 // EVENT LISTENERS & HANDLERS
