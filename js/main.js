@@ -11,69 +11,114 @@ class Composite extends THREE.Group {
     }
 }
 
+class SolarSystem extends Composite {
+    constructor() {
+        super();
+
+        // OPCION PARA LOS PLANETAS -- DATOS REALES ESCALADOS
+        this.sol = new Planet(109, "/img/Sun.jpeg", 0.03333, 0, 0, 0, 0, "sol");
+        this.mercurio = new Planet(0.383, "img/Mercury.jpeg", 1.6, 4.14, 0.38, 0, 0, "mercurio");
+        this.venus = new Planet(.95, "/img/Venus.jpeg", 1.78, 1.6, 0.72, 0 ,0, "venus");
+        this.tierra = new Planet(1, "/img/Earth.jpeg", 1, 1, 1, 0, 0, "tierra");
+        this.marte = new Planet(.533, "/img/Mars.jpeg", 0.8082, 0.53, 1.52, 0 ,0, "marte");
+        this.jupiter = new Planet(11.21, "/img/Jupiter.jpeg", 0.439, 0.084, 5.20, 0 ,0, "jupiter");
+        this.saturno = new Planet(8.52, "/img/Saturn.jpeg", .3254, 0.034, 9.58, 0 ,0, "saturno");
+        this.urano = new Planet(4, "/img/Uranus.jpeg", .229, 0.012, 19.14, 0 ,0, "urano");
+
+        //Neptuno la distancia real debería de ser 30.20 pero se sale del skybox
+        this.neptuno = new Planet(3.88, "/img/Neptune.jpeg", .1823, 0.006, 20.20, 0 ,0, "neptuno");
+
+        this.add(this.sol);
+        this.add(this.mercurio);
+        this.add(this.venus);
+        this.add(this.tierra);
+        this.add(this.marte);
+        this.add(this.jupiter);
+        this.add(this.saturno);
+        this.add(this.urano);
+        this.add(this.neptuno);
+
+        // Default sun focus
+        this.focused = this.sol;
+        console.log(this.children)
+    }
+
+    setFocus(name) {
+        this.focused = Array.from(this.children).find(planet => planet.name === name);
+    }
+
+    rotate() {
+        Array.from(this.children).forEach(planet => planet.rotation.y += Math.PI / 180 * planet.rot);
+    }
+
+    orbit(delta) {
+        Array.from(this.children).forEach(planet => {
+            planet.position.x = planet.posX * Math.cos(delta * planet.tras) + planet.posZ * Math.sin(delta * planet.tras);
+            planet.position.z =  planet.posZ* Math.cos(delta * planet.tras) - planet.posX * Math.sin(delta * planet.tras);
+        });
+    }
+}
+
 class Primitive extends THREE.Mesh {
     constructor() {
         super();
     }
-}
-
-class FlatArrow extends Primitive {
-    constructor() {
-        super();
-        let vertices = [
-            0, 0, 0,
-            0.5, 0, 0.5,
-            0.5, 0, 0.25,
-            0.5, 0, 0,
-            1, 0, 0.25,
-            1, 0, -0.25,
-            0.5, 0, -0.25,
-            0.5, 0, -0.5
-        ];
-        let indices = [
-            0, 3, 1,
-            0, 7, 3,
-            2, 6, 5,
-            2, 5, 4
-        ];
-        this.geometry = new THREE.BufferGeometry();
-        this.geometry.setAttribute(
-        "position",
-        new THREE.Float32BufferAttribute(vertices, 3)
-        );
-        this.geometry.setIndex(indices);
-        this.material = new THREE.MeshBasicMaterial();
+    setWireframe(value) {
+        this.material.wireframe = value;
     }
 }
 
 class OrbitalCamera extends THREE.PerspectiveCamera {
     constructor(fovy, aspectRatio, nearPlane, farPlane) {
         super(fovy, aspectRatio, nearPlane, farPlane);
-        // this.target = new THREE.Vector3(0, 0, 0);
-        // this.position.set(new THREE.Vector3(0, 0, 10));
-        // this.lookAt(this.target);
-        // this.r = this.position.distanceTo(this.target);
     }
 
     focusObj(obj) {
+        // Gets center of bounding box;
         var bbox = new THREE.Box3().setFromObject(obj);
         let xbar = (bbox.min.x + bbox.max.x) / 2;
         let ybar = (bbox.min.y + bbox.max.y) / 2;
         this.target = obj.position.clone();
 
+        // Finds if width or height is longer
         let z1 =
         (bbox.max.y - ybar) / Math.tan(((this.fov / 2) * Math.PI) / 180) + bbox.max.z;
         let z2 =
         (bbox.max.x - xbar) / Math.tan(((this.fov / 2) * Math.PI) / 180) + bbox.max.z;
 
+        // Sets camera
         this.position.set(xbar, ybar, Math.max(z1, z2));
+
+        // Establishes distance between camera and orbit origin
         this.r = this.position.distanceTo(this.target);
+
+        // Sets camera to look at orbit origin
         this.lookAt(this.target);
     }
 
-    orbit(obj, theta) {
+    followSun(obj) {
+        // Gets center of bounding box;
         this.target = obj.position.clone();
+
+        // Finds if width or height is longer
+        // let z1 =
+        // (bbox.max.y - ybar) / Math.tan(((this.fov / 2) * Math.PI) / 180) + bbox.max.z;
+        // let z2 =
+        // (bbox.max.x - xbar) / Math.tan(((this.fov / 2) * Math.PI) / 180) + bbox.max.z;
+
+        // Sets camera
+        this.position.set(this.target.x, this.target.y, this.target.z);
+        this.lookAt(new THREE.Vector3(0, 0, 0));
+    }
+
+    orbit(obj, theta) {
+        // Recalcs the orbit origin
+        this.target = obj.position.clone();
+
+        // Move X(t) + theta
         this.position.set(this.target.x + (this.r * Math.sin(theta)), this.target.y,this.target.z + (this.r * Math.cos(theta)));
+
+        // Sets camera to look at orbit origin
         this.lookAt(this.target);
     }
 }
@@ -113,12 +158,11 @@ class Planet extends Primitive {
 }
 
 // GLOBALS
-let renderer, scene, camera, camera2, camera3, stats, cameraControls, gui, planets, sol, mercurio, venus, tierra, marte, jupiter, saturno, urano, neptuno;
+let renderer, scene, camera, camera3, stats, cameraControls, gui;
+let solarSystem;
 let flagRot, falgTras;
 let card; // Access to DOM card;
 var t = 0;
-var follow = 0;
-var camera_dif = 0;
 
 // Rotation
 let theta = degreesToRad(270);
@@ -136,207 +180,94 @@ function init(event) {
     // SCENE
     scene = new THREE.Scene();
 
-    // CAMERA
+    // CAMERA INIT
     let fovy = 60.0;    // Field ov view
     let aspectRatio = window.innerWidth / window.innerHeight;
     let nearPlane = 0.1;
     let farPlane = 10000.0;
-    camera = new THREE.PerspectiveCamera(fovy, aspectRatio, nearPlane, farPlane);
-    camera.position.set(0, 0, 500);
-    camera.up.set(0,1,0);
-    camera.lookAt(new THREE.Vector3(0,0,0));
+
+    // CAMERA (NORMAL CAM)
+    camera = new OrbitalCamera(fovy, aspectRatio, nearPlane, farPlane);
     cameraControls = new OrbitControls(camera, renderer.domElement);
     cameraControls.enableDamping = true;
 
 
-    // CAMERA2 (Top View)
-    aspectRatio = window.innerWidth/2 / window.innerHeight;
-    camera2 = new THREE.PerspectiveCamera(fovy, aspectRatio, nearPlane, farPlane);
-    camera2.position.set(0, 500, 0);
-    camera2.lookAt(new THREE.Vector3(0,0,0));
-    camera2.up.set(0,0,1);
-
+    // CAMERA (ORBIT VIEW);
     aspectRatio = window.innerWidth/2 / window.innerHeight;
     camera3 = new OrbitalCamera(fovy, aspectRatio, nearPlane, farPlane);
-            
-    // MODEL
-    // GEOMETRY
-    let boxGeom = new THREE.BoxGeometry()
 
-    // MATERIAL
-    let texture1 = new THREE.TextureLoader().load("/img/space.jpeg");
-    let cubeMaterials = [
-        new THREE.MeshBasicMaterial({map: texture1, side: THREE.DoubleSide}),
-        new THREE.MeshBasicMaterial({map: texture1, side: THREE.DoubleSide}),
-        new THREE.MeshBasicMaterial({map: texture1, side: THREE.DoubleSide}),
-        new THREE.MeshBasicMaterial({map: texture1, side: THREE.DoubleSide}),
-        new THREE.MeshBasicMaterial({map: texture1, side: THREE.DoubleSide}),
-        new THREE.MeshBasicMaterial({map: texture1, side: THREE.DoubleSide})
-    ];
-
-    // MESH & SCENE HIERARCHY
-    /*
-    let planets = tPlanets.map(texture => new THREE.MeshBasicMaterial({map: texture})).map(material => new THREE.Mesh(sphereGeom, material));
-
-    planets.forEach((planet, index) => {
-        planet.position.set(-100 + 40* index, 0, 0);
-        scene.add(planet);
-    });
-    */
-    let skybox = new THREE.Mesh(boxGeom, cubeMaterials);
-    skybox.scale.set(10000, 10000, 10000)
-
-    // SCENE HIERARCHY
-    scene.add(skybox);
-
-    //LIGHT
+    // LIGHTS
     let light = new THREE.PointLight( new THREE.Color("white"), 1.5, 10000, 2);
     light.position.set( 0, 0, 0 );
     light.castShadow = true;
     scene.add( light );
+
+    // LIGHT HELPER
     let pointLightHelper = new THREE.PointLightHelper( light, 100 );
     scene.add(pointLightHelper);
+            
+    // SKYBOX
+    let skybox = new THREE.Mesh(new THREE.BoxGeometry() ,new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load("/img/space.jpeg"), side: THREE.DoubleSide}));
+    skybox.scale.set(10000, 10000, 10000)
+    scene.add(skybox);
 
-
-    // OPCION PARA LOS PLANETAS -- DATOS REALES ESCALADOS
-
-    //SOL
-    sol = new Planet(109, "/img/Sun.jpeg", 0.03333, 0, 0, 0, 0, "sol");
-    scene.add(sol);
-
-    //Mercurio
-    mercurio = new Planet(0.383, "img/Mercury.jpeg", 1.6, 4.14, 0.38, 0, 0, "mercurio");
-    scene.add(mercurio);
-
-    //Venus
-    venus = new Planet(.95, "/img/Venus.jpeg", 1.78, 1.6, 0.72, 0 ,0, "venus");
-    scene.add(venus);
-
-    //Tierra 
-    tierra = new Planet(1, "/img/Earth.jpeg", 1, 1, 1, 0, 0, "tierra");
-    scene.add(tierra); 
-
-    //Marte
-    marte = new Planet(.533, "/img/Mars.jpeg", 0.8082, 0.53, 1.52, 0 ,0, "marte");
-    scene.add(marte);
-
-    //Júpiter
-    jupiter = new Planet(11.21, "/img/Jupiter.jpeg", 0.439, 0.084, 5.20, 0 ,0, "jupiter");
-    scene.add(jupiter);
-
-    //Saturno
-    saturno = new Planet(8.52, "/img/Saturn.jpeg", .3254, 0.034, 9.58, 0 ,0, "saturno");
-    scene.add(saturno);
-
-    //Urano
-    urano = new Planet(4, "/img/Uranus.jpeg", .229, 0.012, 19.14, 0 ,0, "urano");
-    scene.add(urano);
-
-    //Neptuno la distancia real debería de ser 30.20 pero se sale del skybox
-    neptuno = new Planet(3.88, "/img/Neptune.jpeg", .1823, 0.006, 20.20, 0 ,0, "neptuno");
-    scene.add(neptuno);
-
-
+    // AXES HELPER
     let worldAxes = new THREE.AxesHelper(100000);
     scene.add(worldAxes);
 
-    planets = [sol, mercurio, venus, tierra, marte, jupiter, saturno, urano, neptuno]
-    camera3.focusObj(planets[follow]);
+    // SOLAR SYSTEM
+    solarSystem = new SolarSystem();
+    scene.add(solarSystem);
 
+    // Set cameras to look at Sun
+    camera.focusObj(solarSystem.focused);
+    camera3.focusObj(solarSystem.focused);
+    
     // GUI
     gui = new dat.GUI();
     gui.close();
 
     let closeUps = {
-        cuTierra: function(){
-            follow = 3
-            camera.position.set(tierra.position.x,tierra.position.y, tierra.position.z+3);
-            camera.up = new THREE.Vector3(0,1,0);
-            camera.lookAt(new THREE.Vector3(tierra.position.x,tierra.position.y,tierra.position.z));
-            cameraControls.target.set(tierra.position.x,tierra.position.y,tierra.position.z);
-            camera_dif = 3;
-
-            // Camera 3
-            camera3.focusObj(planets[follow]);
-        },
         cuMercurio: function(){
-            camera.position.set(mercurio.position.x,mercurio.position.y, mercurio.position.z+3);
-            camera.up = new THREE.Vector3(0,1,0);
-            camera.lookAt(new THREE.Vector3(mercurio.position.x,mercurio.position.y,mercurio.position.z));
-            cameraControls.target.set(mercurio.position.x,mercurio.position.y,mercurio.position.z);
-            follow = 1;   
-            camera_dif = 3;         
-
-            // Camera 3
-            camera3.focusObj(planets[follow]);
+            solarSystem.setFocus("mercurio");
+            camera.focusObj(solarSystem.focused);
+            camera3.focusObj(solarSystem.focused);
         },
         cuVenus: function(){
-            camera.position.set(venus.position.x,venus.position.y, venus.position.z+3);
-            camera.up = new THREE.Vector3(0,1,0);
-            camera.lookAt(new THREE.Vector3(venus.position.x,venus.position.y,venus.position.z));
-            cameraControls.target.set(venus.position.x,venus.position.y,venus.position.z);
-            follow = 2;
-            camera_dif = 3;
-
-            // Camera 3
-            camera3.focusObj(planets[follow]);
+            solarSystem.setFocus("venus");
+            camera3.focusObj(solarSystem.focused);
+            camera.focusObj(solarSystem.focused);
+        },
+        cuTierra: function(){
+            solarSystem.setFocus("tierra");
+            camera.focusObj(solarSystem.focused);
+            camera3.focusObj(solarSystem.focused);
         },
         cuMarte: function(){
-            camera.position.set(marte.position.x,marte.position.y, marte.position.z+3);
-            camera.up = new THREE.Vector3(0,1,0);
-            camera.lookAt(new THREE.Vector3(marte.position.x,marte.position.y,marte.position.z));
-            cameraControls.target.set(marte.position.x,marte.position.y,marte.position.z);
-            follow = 4;
-            camera_dif = 3;
-
-            // Camera 3
-            camera3.focusObj(planets[follow]);
+            solarSystem.setFocus("marte");
+            camera.focusObj(solarSystem.focused);
+            camera3.focusObj(solarSystem.focused);
         },
         cuJupiter: function(){
-            camera.position.set(jupiter.position.x,jupiter.position.y, jupiter.position.z+20);
-            camera.up = new THREE.Vector3(0,1,0);
-            camera.lookAt(new THREE.Vector3(jupiter.position.x,jupiter.position.y,jupiter.position.z));
-            cameraControls.target.set(jupiter.position.x,jupiter.position.y,jupiter.position.z);
-            follow = 5;
-            camera_dif = 20;
-
-            // Camera 3
-            camera3.focusObj(planets[follow]);
+            solarSystem.setFocus("jupiter");
+            camera.focusObj(solarSystem.focused);
+            camera3.focusObj(solarSystem.focused);
         },
         cuSaturno: function(){
-            camera.position.set(saturno.position.x,saturno.position.y, saturno.position.z+20);
-            camera.up = new THREE.Vector3(0,1,0);
-            camera.lookAt(new THREE.Vector3(saturno.position.x,saturno.position.y,saturno.position.z));
-            cameraControls.target.set(saturno.position.x,saturno.position.y,saturno.position.z);
-            follow =6;
-            camera_dif = 20;
-
-            // Camera 3
-            camera3.focusObj(planets[follow]);
+            solarSystem.setFocus("saturno");
+            camera.focusObj(solarSystem.focused);
+            camera3.focusObj(solarSystem.focused);
         },
         cuUrano: function(){
-            camera.position.set(urano.position.x,urano.position.y, urano.position.z+10);
-            camera.up = new THREE.Vector3(0,1,0);
-            camera.lookAt(new THREE.Vector3(urano.position.x,urano.position.y,urano.position.z));
-            cameraControls.target.set(urano.position.x,urano.position.y,urano.position.z);
-            follow = 7;
-            camera_dif = 10;
-
-            // Camera 3
-            camera3.focusObj(planets[follow]);
+            solarSystem.setFocus("urano");
+            camera.focusObj(solarSystem.focused);
+            camera3.focusObj(solarSystem.focused);
         },
         cuNeptuno: function(){
-            follow = 8;
-            camera.position.set(neptuno.position.x,neptuno.position.y, neptuno.position.z+5);
-            camera.up = new THREE.Vector3(0,1,0);
-            camera.lookAt(new THREE.Vector3(neptuno.position.x,neptuno.position.y,neptuno.position.z));
-            cameraControls.target.set(neptuno.position.x,neptuno.position.y,neptuno.position.z);
-            camera_dif = 5;
-
-            // Camera 3
-            camera3.focusObj(planets[follow]);
-        },
-
+            solarSystem.setFocus("neptuno");
+            camera.focusObj(solarSystem.focused);
+            camera3.focusObj(solarSystem.focused);
+        }
     }
 
     let moves = {
@@ -345,13 +276,9 @@ function init(event) {
     }
     let helpers = gui.addFolder("Helpers");
     helpers.add(worldAxes, "visible").name("World Axes").setValue(false).listen().onChange(function(value) {
- 
     });
     helpers.add(pointLightHelper, "visible").name("Point Light").setValue(false).listen().onChange(function(value) {
- 
     });
-    
-
     
     card = document.getElementsByClassName("card")[0];
     let acercamiento = gui.addFolder("Vista")
@@ -448,25 +375,18 @@ function renderLoop() {
 }
 
 function updateScene() {
-    cameraControls.update();
+    // cameraControls.update();
+    // Rotate each planet around own origin
     if (flagRot){
-        for(let p in planets){
-            planets[p].rotation.y += Math.PI / 180 * planets[p].rot;
-        }
+        solarSystem.rotate();
     }
 
-    //translation
+    // Orbit planets
     if(falgTras){
-        for(let p in planets){  
-            if(p != 0 ){
-                planets[p].position.x = planets[p].posX * Math.cos(t*planets[p].tras) + planets[p].posZ * Math.sin(t*planets[p].tras);
-                planets[p].position.z =  planets[p].posZ* Math.cos(t*planets[p].tras) - planets[p].posX * Math.sin(t*planets[p].tras);
-            }
-        }
-        if (follow != 0){
-            camera3.orbit(planets[follow], theta);
-            theta += degreesToRad(planets[follow].rot * 1.2);
-        }
+        solarSystem.orbit(t)
+        camera3.orbit(solarSystem.focused, theta);
+        theta += degreesToRad(solarSystem.focused.rot * 1.2);
+        camera.followSun(solarSystem.focused);
         t+= .01
     }
 }
