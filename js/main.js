@@ -222,7 +222,7 @@ class Saturn extends Composite{
 // GLOBALS
 let renderer, scene, camera, camera3, stats, cameraControls, gui;
 let solarSystem;
-let flagRot, falgTras;
+let flagRot, flagTras;
 let card; // Access to DOM card;
 var t = 0;
 
@@ -390,7 +390,7 @@ function init(event) {
         flagRot = value;
     });
     movements.add(moves, "trasla").name("Traslation").setValue(false).listen().onChange(function(value) {
-        falgTras = value;
+        flagTras = value;
     });
 
     // SETUP STATS
@@ -444,13 +444,15 @@ function updateScene() {
     }
 
     // Orbit planets
-    if(falgTras){
+    if(flagTras){
         solarSystem.orbit(t)
         camera3.orbit(solarSystem.focused, theta);
         theta += degreesToRad(solarSystem.focused.rot * 1.2);
-        camera.followSun(solarSystem.focused);
         t+= .01
     }
+
+    camera.followSun(solarSystem.focused);
+
 }
 
 // EVENT LISTENERS & HANDLERS
