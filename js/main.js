@@ -2,6 +2,8 @@ import * as THREE from "/build/three.module.js";
 import Stats from "/js/jsm/libs/stats.module.js";
 import {OrbitControls} from "/js/jsm/controls/OrbitControls.js";
 import * as dat from "/js/jsm/libs/dat.gui.module.js";
+import {OBJLoader} from "/js/jsm/loaders/OBJLoader.js";
+import {MTLLoader} from "/js/jsm/loaders/MTLLoader.js";
 
 "use strict";
 
@@ -75,6 +77,77 @@ class Planet extends Primitive {
                 });
             });
         }
+        
+    }
+}
+
+class Saturn extends Composite{
+    constructor(radius, textureRoute, rot, tras, posX, posY, posZ, nombre){
+        super();
+        let plan, ring, rm, pm, ring2, ring3;
+        this.position.x = posX*350/2;
+        this.position.y = posY;
+        this.position.z = posZ;
+        this.name = nombre;
+        this.rot = rot;
+        this.tras = tras;
+        this.posX = posX*350/2;
+        this.posY = posY;
+        this.posZ = posZ;
+
+        let pg = new THREE.SphereGeometry(radius/2, 32, 32);
+        let rg= new THREE.TorusGeometry( radius/2 + 1, .7, 3, 200 );
+        let rg2= new THREE.TorusGeometry( radius/2 + 1.5, 1, 2, 200 );
+        let rg3 = new THREE.TorusGeometry( radius/2 + 3.5, 1, 2, 200 );
+
+
+        const loader = new THREE.TextureLoader();
+        loader.load('/img/Saturn Ring.jpeg', (texture) => {
+            rm = new THREE.MeshStandardMaterial({
+                map: texture,
+            });
+            this.ring = new THREE.Mesh(rg, rm);
+            this.ring.receiveShadow = false;
+            this.ring.castShadow = true;
+            this.ring.rotation.x = -Math.PI / 2;
+            this.add(this.ring);
+        });
+        const loader3 = new THREE.TextureLoader();
+        loader3.load('/img/Saturn Ring.jpeg', (texture) => {
+            rm = new THREE.MeshStandardMaterial({
+                map: texture,
+            });
+            this.ring2 = new THREE.Mesh(rg2, rm);
+            this.ring2.receiveShadow = false;
+            this.ring2.castShadow = true;
+            this.ring2.rotation.x = -Math.PI / 2;
+            this.add(this.ring2);
+        });
+        const loader4 = new THREE.TextureLoader();
+        loader4.load('/img/Saturn Ring.jpeg', (texture) => {
+            rm = new THREE.MeshStandardMaterial({
+                map: texture,
+            });
+            this.ring3 = new THREE.Mesh(rg3, rm);
+            this.ring3.receiveShadow = false;
+            this.ring3.castShadow = true;
+            this.ring3.rotation.x = -Math.PI / 2;
+            this.add(this.ring3);
+        });
+
+        const loader2 = new THREE.TextureLoader();
+        loader2.load(textureRoute, (texture) => {
+            pm = new THREE.MeshStandardMaterial({
+                map: texture,
+            });
+            this.plan = new THREE.Mesh(pg, pm);
+            
+            this.plan.receiveShadow = false;
+            this.plan.castShadow = true;
+            this.add(this.plan);
+        });
+
+       
         
     }
 }
@@ -186,7 +259,8 @@ function init(event) {
     scene.add(jupiter);
 
     //Saturno
-    saturno = new Planet(8.52, "/img/Saturn.jpeg", .3254, 0.034, 9.58, 0 ,0, "saturno");
+    //saturno = new Planet(8.52, "/img/Saturn.jpeg", .3254, 0.034, 9.58, 0 ,0, "saturno");
+    saturno = new Saturn(8.52, "/img/Saturn.jpeg", .3254, 0.034, 9.58, 0 ,0, "saturno")
     scene.add(saturno);
 
     //Urano
