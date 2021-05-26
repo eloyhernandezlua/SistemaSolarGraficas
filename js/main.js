@@ -5,6 +5,15 @@ import * as dat from "/js/jsm/libs/dat.gui.module.js";
 
 "use strict";
 
+class Primitive extends THREE.Mesh {
+    constructor() {
+        super();
+    }
+    setWireframe(value) {
+        this.material.wireframe = value;
+    }
+}
+
 class Composite extends THREE.Group {
     constructor() {
         super();
@@ -59,15 +68,6 @@ class SolarSystem extends Composite {
     }
 }
 
-class Primitive extends THREE.Mesh {
-    constructor() {
-        super();
-    }
-    setWireframe(value) {
-        this.material.wireframe = value;
-    }
-}
-
 class OrbitalCamera extends THREE.PerspectiveCamera {
     constructor(fovy, aspectRatio, nearPlane, farPlane) {
         super(fovy, aspectRatio, nearPlane, farPlane);
@@ -97,15 +97,7 @@ class OrbitalCamera extends THREE.PerspectiveCamera {
     }
 
     followSun(obj) {
-        // Gets center of bounding box;
         this.target = obj.position.clone();
-
-        // Finds if width or height is longer
-        // let z1 =
-        // (bbox.max.y - ybar) / Math.tan(((this.fov / 2) * Math.PI) / 180) + bbox.max.z;
-        // let z2 =
-        // (bbox.max.x - xbar) / Math.tan(((this.fov / 2) * Math.PI) / 180) + bbox.max.z;
-
         // Sets camera
         this.position.set(this.target.x, this.target.y, this.target.z);
         this.lookAt(new THREE.Vector3(0, 0, 0));
