@@ -222,7 +222,7 @@ class Saturn extends Composite{
 // GLOBALS
 let renderer, scene, camera, camera3, stats, cameraControls, gui;
 let solarSystem;
-let flagRot, flagTras;
+let flagRot, flagTras, flagVu;
 let card; // Access to DOM card;
 var t = 0;
 
@@ -334,7 +334,8 @@ function init(event) {
 
     let moves = {
         rota: false,
-        trasla: false
+        trasla: false,
+        vuelta: false
     }
     let helpers = gui.addFolder("Helpers");
     helpers.add(worldAxes, "visible").name("World Axes").setValue(false).listen().onChange(function(value) {
@@ -389,10 +390,14 @@ function init(event) {
     movements.add(moves, "rota").name("Rotation").setValue(false).listen().onChange(function(value) {
         flagRot = value;
     });
+    
     movements.add(moves, "trasla").name("Traslation").setValue(false).listen().onChange(function(value) {
         flagTras = value;
     });
 
+    movements.add(moves, "vuelta").name("Recorrido").setValue(false).listen().onChange(function(value) {
+        flagVu = value;
+    });
     // SETUP STATS
     stats = new Stats();
     stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
@@ -436,6 +441,7 @@ function renderLoop() {
     requestAnimationFrame(renderLoop);
 }
 
+
 function updateScene() {
     // cameraControls.update();
     // Rotate each planet around own origin
@@ -451,8 +457,89 @@ function updateScene() {
         t+= .01
     }
 
+
+    if(flagVu){
+        if(camera3.position.x <= 3450){
+            if(camera3.position.x >= 0 && camera3.position.x <= 26){
+                camera3.position.x = camera3.position.x + 1;
+            }
+            if(camera3.position.x >= 27 && camera3.position.x <= 62){
+                camera3.position.z = camera3.position.z - 2.1;
+                camera3.position.x = camera3.position.x + 0.5;   
+            }
+            if(camera3.position.x >= 62 && camera3.position.x <= 73){
+                camera3.position.x = camera3.position.x + 0.05;   
+            }
+            if(camera3.position.x >= 73 && camera3.position.x <= 75){
+                camera3.position.z = camera3.position.z + 0.5;
+                camera3.position.x = camera3.position.x + 1;   
+            }
+            if(camera3.position.x >= 73 && camera3.position.x <= 120){
+                camera3.position.x = camera3.position.x + 2;   
+            }
+            if(camera3.position.x >= 120 && camera3.position.x <= 130){
+                camera3.position.x = camera3.position.x + 0.05;   
+            }
+            if(camera3.position.x >= 130 && camera3.position.x <= 165){
+                camera3.position.x = camera3.position.x + 2;   
+            }
+            if(camera3.position.x >= 165 && camera3.position.x <= 180){
+                camera3.position.x = camera3.position.x + 0.05;   
+            }
+            if(camera3.position.x >= 180 && camera3.position.x <= 181){
+                camera3.position.z = camera3.position.z - 0.5; 
+            }
+            if(camera3.position.x >= 180 && camera3.position.x <= 260){
+                camera3.position.x = camera3.position.x + 2;   
+            }
+            if(camera3.position.x >= 260 && camera3.position.x <= 270){
+                camera3.position.x = camera3.position.x + 0.05;   
+            }
+            if(camera3.position.x >= 270 && camera3.position.x <= 330){
+                camera3.position.z = camera3.position.z + 0.5; 
+                camera3.position.x = camera3.position.x + 2; 
+            }
+            if(camera3.position.x >= 330 && camera3.position.x <= 905){
+                camera3.position.x = camera3.position.x + 2;   
+            }
+            if(camera3.position.x >= 905 && camera3.position.x <= 915){
+                camera3.position.x = camera3.position.x + 0.05;   
+            }
+            if(camera3.position.x >= 915 && camera3.position.x <= 935){
+                camera3.position.z = camera3.position.z + 0.5; 
+                camera3.position.x = camera3.position.x + 2; 
+            }
+            if(camera3.position.x >= 935 && camera3.position.x <= 1671){
+                camera3.position.x = camera3.position.x + 2;   
+            }
+            if(camera3.position.x >= 1671 && camera3.position.x <= 1681){
+                camera3.position.x = camera3.position.x + 0.05;   
+            }
+            if(camera3.position.x >= 1681 && camera3.position.x <= 1715){
+                camera3.position.z = camera3.position.z -  0.5; 
+                camera3.position.x = camera3.position.x + 2; 
+            }
+            if(camera3.position.x >= 1715 && camera3.position.x <= 3345){
+                camera3.position.x = camera3.position.x + 2;   
+            }
+            if(camera3.position.x >= 3345 && camera3.position.x <= 3355){
+                camera3.position.x = camera3.position.x + 0.05;   
+            }
+            if(camera3.position.x >= 3345 && camera3.position.x <= 3530){
+                camera3.position.x = camera3.position.x + 2;   
+            }
+            if(camera3.position.x >= 3530 && camera3.position.x <= 3540){
+                camera3.position.x = camera3.position.x + 0.05;   
+            }
+        }else {
+            camera3.position.set(0, 0, 148.9);
+        }
+       console.log(camera3.position.x, camera3.position.y, camera3.position.z)
+    }
+
     camera.followSun(solarSystem.focused);
 }
+
 
 // EVENT LISTENERS & HANDLERS
 document.addEventListener("DOMContentLoaded", init);
