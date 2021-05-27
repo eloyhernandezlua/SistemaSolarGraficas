@@ -166,9 +166,9 @@ class Saturn extends Composite{
         this.posZ = posZ;
 
         let pg = new THREE.SphereGeometry(radius/2, 32, 32);
-        let rg= new THREE.TorusGeometry( radius/2 + 1, .7, 3, 200 );
-        let rg2= new THREE.TorusGeometry( radius/2 + 1.5, 1, 2, 200 );
-        let rg3 = new THREE.TorusGeometry( radius/2 + 3.5, 1, 2, 200 );
+        let rg= new THREE.TorusGeometry( radius/2 + 1, .2, 3, 200 );
+        let rg2= new THREE.TorusGeometry( radius/2 + 1.5, .5, 2, 200 );
+        let rg3 = new THREE.TorusGeometry( radius/2 + 3, .5, 2, 200 );
 
 
         const loader = new THREE.TextureLoader();
@@ -179,7 +179,7 @@ class Saturn extends Composite{
             this.ring = new THREE.Mesh(rg, rm);
             this.ring.receiveShadow = false;
             this.ring.castShadow = true;
-            this.ring.rotation.x = -Math.PI / 2;
+            this.ring.rotation.x = 1.5;
             this.add(this.ring);
         });
         const loader3 = new THREE.TextureLoader();
@@ -190,7 +190,7 @@ class Saturn extends Composite{
             this.ring2 = new THREE.Mesh(rg2, rm);
             this.ring2.receiveShadow = false;
             this.ring2.castShadow = true;
-            this.ring2.rotation.x = -Math.PI / 2;
+            this.ring2.rotation.x = 1.5;
             this.add(this.ring2);
         });
         const loader4 = new THREE.TextureLoader();
@@ -201,7 +201,7 @@ class Saturn extends Composite{
             this.ring3 = new THREE.Mesh(rg3, rm);
             this.ring3.receiveShadow = false;
             this.ring3.castShadow = true;
-            this.ring3.rotation.x = -Math.PI / 2;
+            this.ring3.rotation.x = 1.5;
             this.add(this.ring3);
         });
 
