@@ -437,7 +437,6 @@ function renderLoop() {
 }
 
 function updateScene() {
-    // cameraControls.update();
     // Rotate each planet around own origin
     if (flagRot){
         solarSystem.rotate();
@@ -451,7 +450,8 @@ function updateScene() {
         t+= .01
     }
 
-    camera.followSun(solarSystem.focused);
+    // camera.followSun(solarSystem.focused);
+    cameraControls.update();
 }
 
 // EVENT LISTENERS & HANDLERS
