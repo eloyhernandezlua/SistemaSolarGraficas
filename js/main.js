@@ -27,7 +27,9 @@ class Composite extends THREE.Group {
     }
 
     setScale(value) {
-        Array.from(this.children).forEach(mesh => mesh.setScale(value));
+        Array.from(this.children).forEach(mesh => {
+            if(mesh instanceof RotatingPrimitive || mesh instanceof RotatingGroup) mesh.setScale(value);
+        });
     }
 }
 
@@ -449,6 +451,8 @@ function init(event) {
     }
     gui.add(params, "scale").name("Escala").setValue(1).min(1).max(20).listen().onChange(function(value) {
         solarSystem.setScale(value);
+        camera.focusObj(solarSystem.focused);
+        camera3.focusObj(solarSystem.focused);
     })
 
     // SETUP STATS
