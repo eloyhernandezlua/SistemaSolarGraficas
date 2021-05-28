@@ -17,7 +17,7 @@ class Primitive extends THREE.Mesh {
     }
 
     setScale(value) {
-        this.scale.addScalar(value);
+        if(this.name !== "sol") this.scale.setScalar(value);
     }
 }
 
@@ -27,7 +27,7 @@ class Composite extends THREE.Group {
     }
 
     setScale(value) {
-        Array.from(this.children).forEach(mesh => this.mesh.setScale(value));
+        Array.from(this.children).forEach(mesh => mesh.setScale(value));
     }
 }
 
@@ -271,7 +271,6 @@ function init(event) {
 
     // SOLAR SYSTEM
     solarSystem = new SolarSystem();
-    // solarSystem.setScale(3);
     scene.add(solarSystem);
 
     // Set cameras to look at Sun
@@ -385,6 +384,13 @@ function init(event) {
     movements.add(moves, "trasla").name("Traslation").setValue(false).listen().onChange(function(value) {
         flagTras = value;
     });
+
+    let params = {
+        scale: 1,
+    }
+    gui.add(params, "scale").name("Escala").setValue(1).min(1).max(20).listen().onChange(function(value) {
+        solarSystem.setScale(value);
+    })
 
     // SETUP STATS
     stats = new Stats();
