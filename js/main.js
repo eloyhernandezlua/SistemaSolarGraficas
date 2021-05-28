@@ -11,8 +11,13 @@ class Primitive extends THREE.Mesh {
     constructor() {
         super();
     }
+
     setWireframe(value) {
         this.material.wireframe = value;
+    }
+
+    setScale(value) {
+        if(this.name !== "sol") this.scale.setScalar(value);
     }
 }
 
@@ -20,20 +25,106 @@ class Composite extends THREE.Group {
     constructor() {
         super();
     }
+
+    setScale(value) {
+        Array.from(this.children).forEach(mesh => {
+            if(mesh instanceof RotatingPrimitive || mesh instanceof RotatingGroup) mesh.setScale(value);
+        });
+    }
 }
 
-class SolarSystem extends Composite {
+class RotatingPrimitive extends Primitive {
+    constructor(rot, tras, posX, posY, posZ, nombre) {
+        super();
+        this.position.x = posX*350/2;
+        this.position.y = posY;
+        this.position.z = posZ;
+        this.name = nombre;
+        this.posX = posX*350/2;
+        this.posY = posY;
+        this.posZ = posZ;
+        this.rot = rot;
+        this.tras = tras;
+    }
+
+    rotate() {
+        this.rotation.y += Math.PI / 180 * this.rot;
+    }
+
+    orbit(delta) {
+        this.position.x = this.posX * Math.cos(delta * this.tras) + this.posZ * Math.sin(delta * this.tras);
+        this.position.z =  this.posZ* Math.cos(delta * this.tras) - this.posX * Math.sin(delta * this.tras);
+        if (this.name == "tierra"){
+            eposx = this.position.x + 1;
+            eposz = this.position.z + 1;
+        }
+    }
+}
+
+class RotatingGroup extends Composite {
+    constructor() {
+        super();
+    }
+
+    rotate() {
+        Array.from(this.children).forEach(mesh => {
+            if(mesh instanceof RotatingPrimitive || mesh instanceof RotatingGroup) {
+                mesh.rotate();
+            }
+        });
+    }
+
+    orbit(delta) {
+        Array.from(this.children).forEach(mesh => {
+            if(mesh instanceof RotatingPrimitive || mesh instanceof RotatingGroup) {
+                mesh.orbit(delta)
+            }
+        });
+    }
+}
+
+class Planet extends RotatingPrimitive {
+    constructor(radius, textureRoute, rot, tras, posX, posY, posZ, nombre){
+        super(rot, tras, posX, posY, posZ, nombre);
+        this.geometry = new THREE.SphereGeometry(radius/2, 32, 32);
+        const loader = new THREE.TextureLoader();
+        loader.load(textureRoute, (texture) => {
+            this.material = nombre !== "sol" ? 
+            new THREE.MeshStandardMaterial({
+                map: texture,
+            }) : 
+            new THREE.MeshBasicMaterial({
+                map: texture,
+            })
+        });
+
+        if(nombre !== "sol") {
+            this.receiveShadow = false;
+            this.castShadow = true;
+        }
+    }
+}
+
+class SolarSystem extends RotatingGroup {
     constructor() {
         super();
 
         // OPCION PARA LOS PLANETAS -- DATOS REALES ESCALADOS
         this.sol = new Planet(109, "./img/Sun.jpeg", 0.03333, 0, 0, 0, 0, "sol");
-        this.mercurio = new Planet(0.383, "./img/Mercury.jpeg", 1.6, 4.14, 0.38, 0, 0, "mercurio");
+
+        this.mercurio = new Planet(0.383, "img/Mercury.jpeg", 1.6, 4.14, 0.38, 0, 0, "mercurio");
+        // this.mercurioOrbitPath = new THREE.Mesh(0.38, 0.38, 1000);
+
         this.venus = new Planet(.95, "./img/Venus.jpeg", 1.78, 1.6, 0.72, 0 ,0, "venus");
+
         this.tierra = new Planet(1, "./img/Earth.jpeg", 1, 1, 1, 0, 0, "tierra");
+
         this.marte = new Planet(.533, "./img/Mars.jpeg", 0.8082, 0.53, 1.52, 0 ,0, "marte");
+
         this.jupiter = new Planet(11.21, "./img/Jupiter.jpeg", 0.439, 0.084, 5.20, 0 ,0, "jupiter");
+
         this.saturno = new Saturn(8.52, "./img/Saturn.jpeg", .3254, 0.034, 9.58, 0 ,0, "saturno");
+
         this.urano = new Planet(4, "./img/Uranus.jpeg", .229, 0.012, 19.14, 0 ,0, "urano");
 
         //Neptuno la distancia real debería de ser 30.20 pero se sale del skybox
@@ -49,24 +140,53 @@ class SolarSystem extends Composite {
         this.add(this.urano);
         this.add(this.neptuno);
 
+        this.mercurioOrbitPath = new THREE.Mesh(new THREE.RingGeometry(this.mercurio.position.x, this.mercurio.position.x + 1, 100), new THREE.MeshBasicMaterial({side: THREE.DoubleSide}));
+        this.mercurioOrbitPath.rotation.x = degreesToRad(90);
+        this.venusOrbitPath = new THREE.Mesh(new THREE.RingGeometry(this.venus.position.x, this.venus.position.x + 1, 100), new THREE.MeshBasicMaterial({side: THREE.DoubleSide}));
+        this.venusOrbitPath.rotation.x = degreesToRad(90);
+        this.tierraOrbitPath = new THREE.Mesh(new THREE.RingGeometry(this.tierra.position.x, this.tierra.position.x + 1, 100), new THREE.MeshBasicMaterial({side: THREE.DoubleSide}));
+        this.tierraOrbitPath.rotation.x = degreesToRad(90);
+        this.marteOrbitPath = new THREE.Mesh(new THREE.RingGeometry(this.marte.position.x, this.marte.position.x + 1, 100), new THREE.MeshBasicMaterial({side: THREE.DoubleSide}));
+        this.marteOrbitPath.rotation.x = degreesToRad(90);
+        this.jupiterOrbitPath = new THREE.Mesh(new THREE.RingGeometry(this.jupiter.position.x, this.jupiter.position.x + 1, 100), new THREE.MeshBasicMaterial({side: THREE.DoubleSide}));
+        this.jupiterOrbitPath.rotation.x = degreesToRad(90);
+        this.saturnoOrbitPath = new THREE.Mesh(new THREE.RingGeometry(this.saturno.children[0].position.x, this.saturno.children[0].position.x + 1, 100), new THREE.MeshBasicMaterial({side: THREE.DoubleSide}));
+        this.saturnoOrbitPath.rotation.x = degreesToRad(90);
+        this.uranoOrbitPath = new THREE.Mesh(new THREE.RingGeometry(this.urano.position.x, this.urano.position.x + 1, 100), new THREE.MeshBasicMaterial({side: THREE.DoubleSide}));
+        this.uranoOrbitPath.rotation.x = degreesToRad(90);
+        this.neptunoOrbitPath = new THREE.Mesh(new THREE.RingGeometry(this.neptuno.position.x, this.neptuno.position.x + 1, 100), new THREE.MeshBasicMaterial({side: THREE.DoubleSide}));
+        this.neptunoOrbitPath.rotation.x = degreesToRad(90);
+
+        this.add(this.mercurioOrbitPath);
+        this.add(this.venusOrbitPath);
+        this.add(this.tierraOrbitPath);
+        this.add(this.marteOrbitPath);
+        this.add(this.jupiterOrbitPath);
+        this.add(this.saturnoOrbitPath);
+        this.add(this.uranoOrbitPath);
+        this.add(this.neptunoOrbitPath);
+
         // Default sun focus
         this.focused = this.sol;
         console.log(this.children)
+        console.log(this.children[6].children[0]);
     }
 
     setFocus(name) {
-        this.focused = Array.from(this.children).find(planet => planet.name === name);
+        this.focused = name !== "saturno" ? Array.from(this.children).find(planet => planet.name === name) : this.children[6].children[0];
+        console.log(this.focused.name);
     }
 
-    rotate() {
-        Array.from(this.children).forEach(planet => planet.rotation.y += Math.PI / 180 * planet.rot);
-    }
-
-    orbit(delta) {
-        Array.from(this.children).forEach(planet => {
-            planet.position.x = planet.posX * Math.cos(delta * planet.tras) + planet.posZ * Math.sin(delta * planet.tras);
-            planet.position.z =  planet.posZ* Math.cos(delta * planet.tras) - planet.posX * Math.sin(delta * planet.tras);
-        });
+    setOrbitPaths(value) {
+        this.mercurio.visible = value;
+        this.mercurioOrbitPath.visible = value;
+        this.venusOrbitPath.visible = value;
+        this.tierraOrbitPath.visible = value;
+        this.marteOrbitPath.visible = value;
+        this.jupiterOrbitPath.visible = value;
+        this.saturnoOrbitPath.visible = value;
+        this.uranoOrbitPath.visible = value;
+        this.neptunoOrbitPath.visible = value;
     }
 }
 
@@ -117,111 +237,46 @@ class OrbitalCamera extends THREE.PerspectiveCamera {
     }
 }
 
-class Planet extends Primitive {
-    constructor(radius, textureRoute, rot, tras, posX, posY, posZ, nombre){
-        super();
-        this.position.x = posX*350/2;
-        this.position.y = posY;
-        this.position.z = posZ;
-        this.name = nombre;
-        this.rot = rot;
-        this.tras = tras;
-        this.posX = posX*350/2;
-        this.posY = posY;
-        this.posZ = posZ;
-
-       this.geometry = new THREE.SphereGeometry(radius/2, 32, 32);
+class Ring extends RotatingPrimitive {
+    constructor(radius, textureRoute, rot, tras, posX, posY, posZ, nombre, tube, radialSegments, tubularSegments, rotation) {
+        super(rot, tras, posX, posY, posZ, nombre);
+        this.geometry = new THREE.TorusGeometry(radius, tube, radialSegments, tubularSegments);
         const loader = new THREE.TextureLoader();
-        if (nombre != "sol"){
-            loader.load(textureRoute, (texture) => {
-                this.material = new THREE.MeshStandardMaterial({
-                    map: texture,
-                });
-                this.receiveShadow = false;
-                this.castShadow = true;
+        loader.load(textureRoute, (texture) => {
+            this.material = new THREE.MeshStandardMaterial({
+                map: texture,
             });
-        } else{
-            loader.load(textureRoute, (texture) => {
-                this.material = new THREE.MeshBasicMaterial({
-                    map: texture,
-                });
-            });
-        }
-        
+        });
+        this.receiveShadow = false;
+        this.castShadow = true;
+        this.rotation.x = rotation;
+    }
+
+    rotate() {
+        this.rotation.z += Math.PI / 180 * this.rot;
     }
 }
 
-class Saturn extends Composite{
+class Saturn extends RotatingGroup {
     constructor(radius, textureRoute, rot, tras, posX, posY, posZ, nombre){
         super();
-        let plan, ring, rm, pm, ring2, ring3;
-        this.position.x = posX*350/2;
-        this.position.y = posY;
-        this.position.z = posZ;
-        this.name = nombre;
-        this.rot = rot;
-        this.tras = tras;
-        this.posX = posX*350/2;
-        this.posY = posY;
-        this.posZ = posZ;
+        this.planet = new Planet(radius, textureRoute, rot, tras, posX, posY, posZ, nombre);
+        this.ring1 = new Ring(radius/2 + 1,'/img/Saturn Ring.jpeg', rot, tras, posX, posY, posZ, "SaturnRing1", .2, 3, 200, 1.7);
+        this.ring2 = new Ring(radius/2 + 1.5,'/img/Saturn Ring.jpeg', rot, tras, posX, posY, posZ, "SaturnRing2", .2, 3, 200, 1.7);
+        this.ring3 = new Ring(radius/2 + 3,'/img/Saturn Ring.jpeg', rot, tras, posX, posY, posZ, "SaturnRing3", .2, 3, 200, 1.7);
 
-        let pg = new THREE.SphereGeometry(radius/2, 32, 32);
-        let rg= new THREE.TorusGeometry( radius/2 + 1, .2, 3, 200 );
-        let rg2= new THREE.TorusGeometry( radius/2 + 1.5, .5, 2, 200 );
-        let rg3 = new THREE.TorusGeometry( radius/2 + 3, .5, 2, 200 );
-
-
-        const loader = new THREE.TextureLoader();
-        loader.load('./img/Saturn Ring.jpeg', (texture) => {
-            rm = new THREE.MeshStandardMaterial({
-                map: texture,
-            });
-            this.ring = new THREE.Mesh(rg, rm);
-            this.ring.receiveShadow = false;
-            this.ring.castShadow = true;
-            this.ring.rotation.x = 1.5;
-            this.add(this.ring);
-        });
-        const loader3 = new THREE.TextureLoader();
-        loader3.load('./img/Saturn Ring.jpeg', (texture) => {
-            rm = new THREE.MeshStandardMaterial({
-                map: texture,
-            });
-            this.ring2 = new THREE.Mesh(rg2, rm);
-            this.ring2.receiveShadow = false;
-            this.ring2.castShadow = true;
-            this.ring2.rotation.x = 1.5;
-            this.add(this.ring2);
-        });
-        const loader4 = new THREE.TextureLoader();
-        loader4.load('./img/Saturn Ring.jpeg', (texture) => {
-            rm = new THREE.MeshStandardMaterial({
-                map: texture,
-            });
-            this.ring3 = new THREE.Mesh(rg3, rm);
-            this.ring3.receiveShadow = false;
-            this.ring3.castShadow = true;
-            this.ring3.rotation.x = 1.5;
-            this.add(this.ring3);
-        });
-
-        const loader2 = new THREE.TextureLoader();
-        loader2.load(textureRoute, (texture) => {
-            pm = new THREE.MeshStandardMaterial({
-                map: texture,
-            });
-            this.plan = new THREE.Mesh(pg, pm);
-            
-            this.plan.receiveShadow = false;
-            this.plan.castShadow = true;
-            this.add(this.plan);
-        });
+        this.add(this.planet);
+        this.add(this.ring1);
+        this.add(this.ring2);
+        this.add(this.ring3);
     }
 }
 
 // GLOBALS
-let renderer, scene, camera, camera3, stats, cameraControls, gui;
+let renderer, scene, camera, camera3, stats, cameraControls, gui, station;
 let solarSystem;
+let eposx = 176;
+let eposz = 1
 let flagRot, flagTras;
 let card; // Access to DOM card;
 var t = 0;
@@ -246,7 +301,7 @@ function init(event) {
     let fovy = 60.0;    // Field ov view
     let aspectRatio = window.innerWidth / window.innerHeight;
     let nearPlane = 0.1;
-    let farPlane = 10000.0;
+    let farPlane = 13000.0;
 
     // CAMERA (NORMAL CAM)
     camera = new OrbitalCamera(fovy, aspectRatio, nearPlane, farPlane);
@@ -270,12 +325,27 @@ function init(event) {
             
     // SKYBOX
     let skybox = new THREE.Mesh(new THREE.BoxGeometry() ,new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load("./img/space.jpeg"), side: THREE.DoubleSide}));
-    skybox.scale.set(10000, 10000, 10000)
+    skybox.scale.setScalar(10000)
     scene.add(skybox);
 
     // AXES HELPER
     let worldAxes = new THREE.AxesHelper(100000);
     scene.add(worldAxes);
+
+    let mtlLoader = new MTLLoader();
+    mtlLoader.load('./assets/uploads_files_2840923_SpaceStation.mtl', function(materials) {
+        materials.preload();
+        var objLoader = new OBJLoader();
+        objLoader.setMaterials(materials);
+        objLoader.load('./assets/uploads_files_2840923_SpaceStation.obj', function (object) {
+            object.position.y = object.position.y - 60.;
+            station = object;
+            // SCENE HIERARCHY
+            scene.add(station);
+            station.scale.set(.00007, .00007, .00007);
+            station.position.set(176,0,1);
+        });
+    });
 
     // SOLAR SYSTEM
     solarSystem = new SolarSystem();
@@ -334,12 +404,16 @@ function init(event) {
 
     let moves = {
         rota: false,
-        trasla: false
+        trasla: false,
+        visiblePaths: true,
     }
     let helpers = gui.addFolder("Helpers");
     helpers.add(worldAxes, "visible").name("World Axes").setValue(false).listen().onChange(function(value) {
     });
     helpers.add(pointLightHelper, "visible").name("Point Light").setValue(false).listen().onChange(function(value) {
+    });
+    helpers.add(moves, "visiblePaths").name("Orbit Paths").setValue(true).listen().onChange(function(value) {
+        solarSystem.setOrbitPaths(value);
     });
     
     card = document.getElementsByClassName("card")[0];
@@ -393,6 +467,18 @@ function init(event) {
         flagTras = value;
     });
 
+    let params = {
+        scale: 1,
+    }
+    gui.add(params, "scale").name("Escala").setValue(1).min(1).max(20).listen().onChange(function(value) {
+        solarSystem.setScale(value);
+        station.scale.set(value*.00007, value*.00007, value*.00007);
+        station.position.x = eposx + value *.8;
+        station.position.z = eposz + value*.8
+        console.log(station.position)
+        camera3.focusObj(solarSystem.focused);
+    })
+
     // SETUP STATS
     stats = new Stats();
     stats.showPanel(0); // 0: fps, 1: ms, 2: mb, 3+: custom
@@ -437,7 +523,6 @@ function renderLoop() {
 }
 
 function updateScene() {
-    // cameraControls.update();
     // Rotate each planet around own origin
     if (flagRot){
         solarSystem.rotate();
@@ -445,13 +530,15 @@ function updateScene() {
 
     // Orbit planets
     if(flagTras){
-        solarSystem.orbit(t)
+        solarSystem.orbit(t);
+        station.position.x = eposx;
+        station.position.z =  eposz;
         camera3.orbit(solarSystem.focused, theta);
-        theta += degreesToRad(solarSystem.focused.rot * 1.2);
-        t+= .01
+        theta += degreesToRad(0.5);
+        t+= .01;
     }
 
-    camera.followSun(solarSystem.focused);
+    if(multiview) cameraControls.update();
 }
 
 // EVENT LISTENERS & HANDLERS
