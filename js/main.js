@@ -261,9 +261,9 @@ class Saturn extends RotatingGroup {
     constructor(radius, textureRoute, rot, tras, posX, posY, posZ, nombre){
         super();
         this.planet = new Planet(radius, textureRoute, rot, tras, posX, posY, posZ, nombre);
-        this.ring1 = new Ring(radius/2 + 1,'/img/Saturn Ring.jpeg', rot, tras, posX, posY, posZ, "SaturnRing1", .2, 3, 200, 1.7);
-        this.ring2 = new Ring(radius/2 + 1.5,'/img/Saturn Ring.jpeg', rot, tras, posX, posY, posZ, "SaturnRing2", .2, 3, 200, 1.7);
-        this.ring3 = new Ring(radius/2 + 3,'/img/Saturn Ring.jpeg', rot, tras, posX, posY, posZ, "SaturnRing3", .2, 3, 200, 1.7);
+        this.ring1 = new Ring(radius/2 + 1,'./img/Saturn Ring.jpeg', rot, tras, posX, posY, posZ, "SaturnRing1", .2, 3, 200, 1.7);
+        this.ring2 = new Ring(radius/2 + 1.5,'./img/Saturn Ring.jpeg', rot, tras, posX, posY, posZ, "SaturnRing2", .2, 3, 200, 1.7);
+        this.ring3 = new Ring(radius/2 + 3,'./img/Saturn Ring.jpeg', rot, tras, posX, posY, posZ, "SaturnRing3", .2, 3, 200, 1.7);
 
         this.add(this.planet);
         this.add(this.ring1);
