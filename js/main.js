@@ -11,8 +11,13 @@ class Primitive extends THREE.Mesh {
     constructor() {
         super();
     }
+
     setWireframe(value) {
         this.material.wireframe = value;
+    }
+
+    setScale(value) {
+        this.scale.addScalar(value);
     }
 }
 
@@ -20,9 +25,73 @@ class Composite extends THREE.Group {
     constructor() {
         super();
     }
+
+    setScale(value) {
+        Array.from(this.children).forEach(mesh => this.mesh.setScale(value));
+    }
 }
 
-class SolarSystem extends Composite {
+class RotatingPrimitive extends Primitive {
+    constructor(rot, tras, posX, posY, posZ, nombre) {
+        super();
+        this.position.x = posX*350/2;
+        this.position.y = posY;
+        this.position.z = posZ;
+        this.name = nombre;
+        this.posX = posX*350/2;
+        this.posY = posY;
+        this.posZ = posZ;
+        this.rot = rot;
+        this.tras = tras;
+    }
+
+    rotate() {
+        this.rotation.y += Math.PI / 180 * this.rot;
+    }
+
+    orbit(delta) {
+        this.position.x = this.posX * Math.cos(delta * this.tras) + this.posZ * Math.sin(delta * this.tras);
+        this.position.z =  this.posZ* Math.cos(delta * this.tras) - this.posX * Math.sin(delta * this.tras);
+    }
+}
+
+class RotatingGroup extends Composite {
+    constructor() {
+        super();
+    }
+
+    rotate() {
+        Array.from(this.children).forEach(mesh => mesh.rotate());
+    }
+
+    orbit(delta) {
+        Array.from(this.children).forEach(mesh => mesh.orbit(delta));
+    }
+}
+
+class Planet extends RotatingPrimitive {
+    constructor(radius, textureRoute, rot, tras, posX, posY, posZ, nombre){
+        super(rot, tras, posX, posY, posZ, nombre);
+        this.geometry = new THREE.SphereGeometry(radius/2, 32, 32);
+        const loader = new THREE.TextureLoader();
+        loader.load(textureRoute, (texture) => {
+            this.material = nombre !== "sol" ? 
+            new THREE.MeshStandardMaterial({
+                map: texture,
+            }) : 
+            new THREE.MeshBasicMaterial({
+                map: texture,
+            })
+        });
+
+        if(nombre !== "sol") {
+            this.receiveShadow = false;
+            this.castShadow = true;
+        }
+    }
+}
+
+class SolarSystem extends RotatingGroup {
     constructor() {
         super();
 
@@ -35,7 +104,6 @@ class SolarSystem extends Composite {
         this.jupiter = new Planet(11.21, "/img/Jupiter.jpeg", 0.439, 0.084, 5.20, 0 ,0, "jupiter");
         this.saturno = new Saturn(8.52, "/img/Saturn.jpeg", .3254, 0.034, 9.58, 0 ,0, "saturno");
         this.urano = new Planet(4, "/img/Uranus.jpeg", .229, 0.012, 19.14, 0 ,0, "urano");
-
         //Neptuno la distancia real debería de ser 30.20 pero se sale del skybox
         this.neptuno = new Planet(3.88, "/img/Neptune.jpeg", .1823, 0.006, 20.20, 0 ,0, "neptuno");
 
@@ -52,21 +120,12 @@ class SolarSystem extends Composite {
         // Default sun focus
         this.focused = this.sol;
         console.log(this.children)
+        console.log(this.children[6].children[0]);
     }
 
     setFocus(name) {
-        this.focused = Array.from(this.children).find(planet => planet.name === name);
-    }
-
-    rotate() {
-        Array.from(this.children).forEach(planet => planet.rotation.y += Math.PI / 180 * planet.rot);
-    }
-
-    orbit(delta) {
-        Array.from(this.children).forEach(planet => {
-            planet.position.x = planet.posX * Math.cos(delta * planet.tras) + planet.posZ * Math.sin(delta * planet.tras);
-            planet.position.z =  planet.posZ* Math.cos(delta * planet.tras) - planet.posX * Math.sin(delta * planet.tras);
-        });
+        this.focused = name !== "saturno" ? Array.from(this.children).find(planet => planet.name === name) : this.children[6].children[0];
+        console.log(this.focused.name);
     }
 }
 
@@ -117,105 +176,38 @@ class OrbitalCamera extends THREE.PerspectiveCamera {
     }
 }
 
-class Planet extends Primitive {
-    constructor(radius, textureRoute, rot, tras, posX, posY, posZ, nombre){
-        super();
-        this.position.x = posX*350/2;
-        this.position.y = posY;
-        this.position.z = posZ;
-        this.name = nombre;
-        this.rot = rot;
-        this.tras = tras;
-        this.posX = posX*350/2;
-        this.posY = posY;
-        this.posZ = posZ;
-
-       this.geometry = new THREE.SphereGeometry(radius/2, 32, 32);
+class Ring extends RotatingPrimitive {
+    constructor(radius, textureRoute, rot, tras, posX, posY, posZ, nombre, tube, radialSegments, tubularSegments, rotation) {
+        super(rot, tras, posX, posY, posZ, nombre);
+        this.geometry = new THREE.TorusGeometry(radius, tube, radialSegments, tubularSegments);
         const loader = new THREE.TextureLoader();
-        if (nombre != "sol"){
-            loader.load(textureRoute, (texture) => {
-                this.material = new THREE.MeshStandardMaterial({
-                    map: texture,
-                });
-                this.receiveShadow = false;
-                this.castShadow = true;
+        loader.load(textureRoute, (texture) => {
+            this.material = new THREE.MeshStandardMaterial({
+                map: texture,
             });
-        } else{
-            loader.load(textureRoute, (texture) => {
-                this.material = new THREE.MeshBasicMaterial({
-                    map: texture,
-                });
-            });
-        }
-        
+        });
+        this.receiveShadow = false;
+        this.castShadow = true;
+        this.rotation.x = rotation;
+    }
+
+    rotate() {
+        this.rotation.z += Math.PI / 180 * this.rot;
     }
 }
 
-class Saturn extends Composite{
+class Saturn extends RotatingGroup {
     constructor(radius, textureRoute, rot, tras, posX, posY, posZ, nombre){
         super();
-        let plan, ring, rm, pm, ring2, ring3;
-        this.position.x = posX*350/2;
-        this.position.y = posY;
-        this.position.z = posZ;
-        this.name = nombre;
-        this.rot = rot;
-        this.tras = tras;
-        this.posX = posX*350/2;
-        this.posY = posY;
-        this.posZ = posZ;
+        this.planet = new Planet(radius, textureRoute, rot, tras, posX, posY, posZ, nombre);
+        this.ring1 = new Ring(radius/2 + 1,'/img/Saturn Ring.jpeg', rot, tras, posX, posY, posZ, "SaturnRing1", .2, 3, 200, 1.7);
+        this.ring2 = new Ring(radius/2 + 1.5,'/img/Saturn Ring.jpeg', rot, tras, posX, posY, posZ, "SaturnRing2", .2, 3, 200, 1.7);
+        this.ring3 = new Ring(radius/2 + 3,'/img/Saturn Ring.jpeg', rot, tras, posX, posY, posZ, "SaturnRing3", .2, 3, 200, 1.7);
 
-        let pg = new THREE.SphereGeometry(radius/2, 32, 32);
-        let rg= new THREE.TorusGeometry( radius/2 + 1, .2, 3, 200 );
-        let rg2= new THREE.TorusGeometry( radius/2 + 1.5, .5, 2, 200 );
-        let rg3 = new THREE.TorusGeometry( radius/2 + 3, .5, 2, 200 );
-
-
-        const loader = new THREE.TextureLoader();
-        loader.load('/img/Saturn Ring.jpeg', (texture) => {
-            rm = new THREE.MeshStandardMaterial({
-                map: texture,
-            });
-            this.ring = new THREE.Mesh(rg, rm);
-            this.ring.receiveShadow = false;
-            this.ring.castShadow = true;
-            this.ring.rotation.x = 1.5;
-            this.add(this.ring);
-        });
-        const loader3 = new THREE.TextureLoader();
-        loader3.load('/img/Saturn Ring.jpeg', (texture) => {
-            rm = new THREE.MeshStandardMaterial({
-                map: texture,
-            });
-            this.ring2 = new THREE.Mesh(rg2, rm);
-            this.ring2.receiveShadow = false;
-            this.ring2.castShadow = true;
-            this.ring2.rotation.x = 1.5;
-            this.add(this.ring2);
-        });
-        const loader4 = new THREE.TextureLoader();
-        loader4.load('/img/Saturn Ring.jpeg', (texture) => {
-            rm = new THREE.MeshStandardMaterial({
-                map: texture,
-            });
-            this.ring3 = new THREE.Mesh(rg3, rm);
-            this.ring3.receiveShadow = false;
-            this.ring3.castShadow = true;
-            this.ring3.rotation.x = 1.5;
-            this.add(this.ring3);
-        });
-
-        const loader2 = new THREE.TextureLoader();
-        loader2.load(textureRoute, (texture) => {
-            pm = new THREE.MeshStandardMaterial({
-                map: texture,
-            });
-            this.plan = new THREE.Mesh(pg, pm);
-            
-            this.plan.receiveShadow = false;
-            this.plan.castShadow = true;
-            this.add(this.plan);
-        });
+        this.add(this.planet);
+        this.add(this.ring1);
+        this.add(this.ring2);
+        this.add(this.ring3);
     }
 }
 
@@ -279,6 +271,7 @@ function init(event) {
 
     // SOLAR SYSTEM
     solarSystem = new SolarSystem();
+    // solarSystem.setScale(3);
     scene.add(solarSystem);
 
     // Set cameras to look at Sun
@@ -447,11 +440,10 @@ function updateScene() {
         solarSystem.orbit(t)
         camera3.orbit(solarSystem.focused, theta);
         theta += degreesToRad(solarSystem.focused.rot * 1.2);
-        t+= .01
+        t+= .01;
     }
 
-    // camera.followSun(solarSystem.focused);
-    cameraControls.update();
+    if(multiview) cameraControls.update();
 }
 
 // EVENT LISTENERS & HANDLERS
