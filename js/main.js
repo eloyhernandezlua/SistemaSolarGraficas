@@ -238,7 +238,7 @@ function init(event) {
     let fovy = 60.0;    // Field ov view
     let aspectRatio = window.innerWidth / window.innerHeight;
     let nearPlane = 0.1;
-    let farPlane = 10000.0;
+    let farPlane = 11000.0;
 
     // CAMERA (NORMAL CAM)
     camera = new OrbitalCamera(fovy, aspectRatio, nearPlane, farPlane);
@@ -262,7 +262,7 @@ function init(event) {
             
     // SKYBOX
     let skybox = new THREE.Mesh(new THREE.BoxGeometry() ,new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load("/img/space.jpeg"), side: THREE.DoubleSide}));
-    skybox.scale.set(10000, 10000, 10000)
+    skybox.scale.setScalar(10000)
     scene.add(skybox);
 
     // AXES HELPER
