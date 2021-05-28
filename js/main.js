@@ -31,7 +31,7 @@ class SolarSystem extends Composite {
         this.mercurio = new Planet(0.383, "/img/Mercury.jpeg", 1.6, 4.14, 0.38, 0, 0, "mercurio");
         this.venus = new Planet(.95, "/img/Venus.jpeg", 1.78, 1.6, 0.72, 0 ,0, "venus");
         this.tierra = new Planet(1, "/img/Earth.jpeg", 1, 1, 1, 0, 0, "tierra");
-        this.marte = new Planet(.533, "/img/Mars.jpeg", 0.8082, 0.53, 1.52, 0 ,0, "marte");
+        this.marte = new Planet(.533, "SistemaSolarGraficas/img/Mars.jpeg", 0.8082, 0.53, 1.52, 0 ,0, "marte");
         this.jupiter = new Planet(11.21, "/img/Jupiter.jpeg", 0.439, 0.084, 5.20, 0 ,0, "jupiter");
         this.saturno = new Saturn(8.52, "/img/Saturn.jpeg", .3254, 0.034, 9.58, 0 ,0, "saturno");
         this.urano = new Planet(4, "/img/Uranus.jpeg", .229, 0.012, 19.14, 0 ,0, "urano");
