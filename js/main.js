@@ -27,7 +27,7 @@ class SolarSystem extends Composite {
         super();
 
         // OPCION PARA LOS PLANETAS -- DATOS REALES ESCALADOS
-        this.sol = new Planet(109, "/img/Sun.jpeg", 0.03333, 0, 0, 0, 0, "sol");
+        this.sol = new Planet(109, "SistemaSolarGraficas/img/Sun.jpeg", 0.03333, 0, 0, 0, 0, "sol");
         this.mercurio = new Planet(0.383, "/img/Mercury.jpeg", 1.6, 4.14, 0.38, 0, 0, "mercurio");
         this.venus = new Planet(.95, "/img/Venus.jpeg", 1.78, 1.6, 0.72, 0 ,0, "venus");
         this.tierra = new Planet(1, "/img/Earth.jpeg", 1, 1, 1, 0, 0, "tierra");
