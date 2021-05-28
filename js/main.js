@@ -162,6 +162,18 @@ class SolarSystem extends RotatingGroup {
         this.focused = name !== "saturno" ? Array.from(this.children).find(planet => planet.name === name) : this.children[6].children[0];
         console.log(this.focused.name);
     }
+
+    setOrbitPaths(value) {
+        this.mercurio.visible = value;
+        this.mercurioOrbitPath.visible = value;
+        this.venusOrbitPath.visible = value;
+        this.tierraOrbitPath.visible = value;
+        this.marteOrbitPath.visible = value;
+        this.jupiterOrbitPath.visible = value;
+        this.saturnoOrbitPath.visible = value;
+        this.uranoOrbitPath.visible = value;
+        this.neptunoOrbitPath.visible = value;
+    }
 }
 
 class OrbitalCamera extends THREE.PerspectiveCamera {
@@ -361,12 +373,16 @@ function init(event) {
 
     let moves = {
         rota: false,
-        trasla: false
+        trasla: false,
+        visiblePaths: true,
     }
     let helpers = gui.addFolder("Helpers");
     helpers.add(worldAxes, "visible").name("World Axes").setValue(false).listen().onChange(function(value) {
     });
     helpers.add(pointLightHelper, "visible").name("Point Light").setValue(false).listen().onChange(function(value) {
+    });
+    helpers.add(moves, "visiblePaths").name("Orbit Paths").setValue(true).listen().onChange(function(value) {
+        solarSystem.setOrbitPaths(value);
     });
     
     card = document.getElementsByClassName("card")[0];
