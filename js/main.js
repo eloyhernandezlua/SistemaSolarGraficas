@@ -269,7 +269,7 @@ function init(event) {
     scene.add(pointLightHelper);
             
     // SKYBOX
-    let skybox = new THREE.Mesh(new THREE.BoxGeometry() ,new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load("/img/space.jpeg"), side: THREE.DoubleSide}));
+    let skybox = new THREE.Mesh(new THREE.BoxGeometry() ,new THREE.MeshBasicMaterial({map: new THREE.TextureLoader().load("./img/space.jpeg"), side: THREE.DoubleSide}));
     skybox.scale.set(10000, 10000, 10000)
     scene.add(skybox);
 
