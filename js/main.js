@@ -61,11 +61,19 @@ class RotatingGroup extends Composite {
     }
 
     rotate() {
-        Array.from(this.children).forEach(mesh => mesh.rotate());
+        Array.from(this.children).forEach(mesh => {
+            if(mesh instanceof RotatingPrimitive || mesh instanceof RotatingGroup) {
+                mesh.rotate();
+            }
+        });
     }
 
     orbit(delta) {
-        Array.from(this.children).forEach(mesh => mesh.orbit(delta));
+        Array.from(this.children).forEach(mesh => {
+            if(mesh instanceof RotatingPrimitive || mesh instanceof RotatingGroup) {
+                mesh.orbit(delta)
+            }
+        });
     }
 }
 
