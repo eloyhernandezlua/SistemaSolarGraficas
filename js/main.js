@@ -451,7 +451,6 @@ function init(event) {
     }
     gui.add(params, "scale").name("Escala").setValue(1).min(1).max(20).listen().onChange(function(value) {
         solarSystem.setScale(value);
-        camera.focusObj(solarSystem.focused);
         camera3.focusObj(solarSystem.focused);
     })
 
