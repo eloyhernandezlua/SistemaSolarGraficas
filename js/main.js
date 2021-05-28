@@ -54,6 +54,10 @@ class RotatingPrimitive extends Primitive {
     orbit(delta) {
         this.position.x = this.posX * Math.cos(delta * this.tras) + this.posZ * Math.sin(delta * this.tras);
         this.position.z =  this.posZ* Math.cos(delta * this.tras) - this.posX * Math.sin(delta * this.tras);
+        if (this.name == "tierra"){
+            eposx = this.position.x + 1;
+            eposz = this.position.z + 1;
+        }
     }
 }
 
@@ -269,8 +273,10 @@ class Saturn extends RotatingGroup {
 }
 
 // GLOBALS
-let renderer, scene, camera, camera3, stats, cameraControls, gui;
+let renderer, scene, camera, camera3, stats, cameraControls, gui, station;
 let solarSystem;
+let eposx = 176;
+let eposz = 1
 let flagRot, flagTras;
 let card; // Access to DOM card;
 var t = 0;
@@ -325,6 +331,21 @@ function init(event) {
     // AXES HELPER
     let worldAxes = new THREE.AxesHelper(100000);
     scene.add(worldAxes);
+
+    let mtlLoader = new MTLLoader();
+    mtlLoader.load('./assets/uploads_files_2840923_SpaceStation.mtl', function(materials) {
+        materials.preload();
+        var objLoader = new OBJLoader();
+        objLoader.setMaterials(materials);
+        objLoader.load('./assets/uploads_files_2840923_SpaceStation.obj', function (object) {
+            object.position.y = object.position.y - 60.;
+            station = object;
+            // SCENE HIERARCHY
+            scene.add(station);
+            station.scale.set(.00007, .00007, .00007);
+            station.position.set(176,0,1);
+        });
+    });
 
     // SOLAR SYSTEM
     solarSystem = new SolarSystem();
@@ -451,6 +472,10 @@ function init(event) {
     }
     gui.add(params, "scale").name("Escala").setValue(1).min(1).max(20).listen().onChange(function(value) {
         solarSystem.setScale(value);
+        station.scale.set(value*.00007, value*.00007, value*.00007);
+        station.position.x = eposx + value *.8;
+        station.position.z = eposz + value*.8
+        console.log(station.position)
         camera3.focusObj(solarSystem.focused);
     })
 
@@ -505,7 +530,9 @@ function updateScene() {
 
     // Orbit planets
     if(flagTras){
-        solarSystem.orbit(t)
+        solarSystem.orbit(t);
+        station.position.x = eposx;
+        station.position.z =  eposz;
         camera3.orbit(solarSystem.focused, theta);
         theta += degreesToRad(0.5);
         t+= .01;
