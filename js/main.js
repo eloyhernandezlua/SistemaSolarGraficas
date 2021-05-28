@@ -97,13 +97,22 @@ class SolarSystem extends RotatingGroup {
 
         // OPCION PARA LOS PLANETAS -- DATOS REALES ESCALADOS
         this.sol = new Planet(109, "/img/Sun.jpeg", 0.03333, 0, 0, 0, 0, "sol");
+
         this.mercurio = new Planet(0.383, "img/Mercury.jpeg", 1.6, 4.14, 0.38, 0, 0, "mercurio");
+        // this.mercurioOrbitPath = new THREE.Mesh(0.38, 0.38, 1000);
+
         this.venus = new Planet(.95, "/img/Venus.jpeg", 1.78, 1.6, 0.72, 0 ,0, "venus");
+
         this.tierra = new Planet(1, "/img/Earth.jpeg", 1, 1, 1, 0, 0, "tierra");
+
         this.marte = new Planet(.533, "/img/Mars.jpeg", 0.8082, 0.53, 1.52, 0 ,0, "marte");
+
         this.jupiter = new Planet(11.21, "/img/Jupiter.jpeg", 0.439, 0.084, 5.20, 0 ,0, "jupiter");
+
         this.saturno = new Saturn(8.52, "/img/Saturn.jpeg", .3254, 0.034, 9.58, 0 ,0, "saturno");
+
         this.urano = new Planet(4, "/img/Uranus.jpeg", .229, 0.012, 19.14, 0 ,0, "urano");
+
         //Neptuno la distancia real debería de ser 30.20 pero se sale del skybox
         this.neptuno = new Planet(3.88, "/img/Neptune.jpeg", .1823, 0.006, 20.20, 0 ,0, "neptuno");
 
@@ -116,6 +125,32 @@ class SolarSystem extends RotatingGroup {
         this.add(this.saturno);
         this.add(this.urano);
         this.add(this.neptuno);
+
+        this.mercurioOrbitPath = new THREE.Mesh(new THREE.RingGeometry(this.mercurio.position.x, this.mercurio.position.x + 1, 100), new THREE.MeshBasicMaterial({side: THREE.DoubleSide}));
+        this.mercurioOrbitPath.rotation.x = degreesToRad(90);
+        this.venusOrbitPath = new THREE.Mesh(new THREE.RingGeometry(this.venus.position.x, this.venus.position.x + 1, 100), new THREE.MeshBasicMaterial({side: THREE.DoubleSide}));
+        this.venusOrbitPath.rotation.x = degreesToRad(90);
+        this.tierraOrbitPath = new THREE.Mesh(new THREE.RingGeometry(this.tierra.position.x, this.tierra.position.x + 1, 100), new THREE.MeshBasicMaterial({side: THREE.DoubleSide}));
+        this.tierraOrbitPath.rotation.x = degreesToRad(90);
+        this.marteOrbitPath = new THREE.Mesh(new THREE.RingGeometry(this.marte.position.x, this.marte.position.x + 1, 100), new THREE.MeshBasicMaterial({side: THREE.DoubleSide}));
+        this.marteOrbitPath.rotation.x = degreesToRad(90);
+        this.jupiterOrbitPath = new THREE.Mesh(new THREE.RingGeometry(this.jupiter.position.x, this.jupiter.position.x + 1, 100), new THREE.MeshBasicMaterial({side: THREE.DoubleSide}));
+        this.jupiterOrbitPath.rotation.x = degreesToRad(90);
+        this.saturnoOrbitPath = new THREE.Mesh(new THREE.RingGeometry(this.saturno.children[0].position.x, this.saturno.children[0].position.x + 1, 100), new THREE.MeshBasicMaterial({side: THREE.DoubleSide}));
+        this.saturnoOrbitPath.rotation.x = degreesToRad(90);
+        this.uranoOrbitPath = new THREE.Mesh(new THREE.RingGeometry(this.urano.position.x, this.urano.position.x + 1, 100), new THREE.MeshBasicMaterial({side: THREE.DoubleSide}));
+        this.uranoOrbitPath.rotation.x = degreesToRad(90);
+        this.neptunoOrbitPath = new THREE.Mesh(new THREE.RingGeometry(this.neptuno.position.x, this.neptuno.position.x + 1, 100), new THREE.MeshBasicMaterial({side: THREE.DoubleSide}));
+        this.neptunoOrbitPath.rotation.x = degreesToRad(90);
+
+        this.add(this.mercurioOrbitPath);
+        this.add(this.venusOrbitPath);
+        this.add(this.tierraOrbitPath);
+        this.add(this.marteOrbitPath);
+        this.add(this.jupiterOrbitPath);
+        this.add(this.saturnoOrbitPath);
+        this.add(this.uranoOrbitPath);
+        this.add(this.neptunoOrbitPath);
 
         // Default sun focus
         this.focused = this.sol;
@@ -238,7 +273,7 @@ function init(event) {
     let fovy = 60.0;    // Field ov view
     let aspectRatio = window.innerWidth / window.innerHeight;
     let nearPlane = 0.1;
-    let farPlane = 11000.0;
+    let farPlane = 13000.0;
 
     // CAMERA (NORMAL CAM)
     camera = new OrbitalCamera(fovy, aspectRatio, nearPlane, farPlane);
@@ -445,7 +480,7 @@ function updateScene() {
     if(flagTras){
         solarSystem.orbit(t)
         camera3.orbit(solarSystem.focused, theta);
-        theta += degreesToRad(solarSystem.focused.rot * 1.2);
+        theta += degreesToRad(0.5);
         t+= .01;
     }
 
