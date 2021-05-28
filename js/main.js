@@ -27,17 +27,17 @@ class SolarSystem extends Composite {
         super();
 
         // OPCION PARA LOS PLANETAS -- DATOS REALES ESCALADOS
-        this.sol = new Planet(109, "SistemaSolarGraficas/img/Sun.jpeg", 0.03333, 0, 0, 0, 0, "sol");
-        this.mercurio = new Planet(0.383, "/img/Mercury.jpeg", 1.6, 4.14, 0.38, 0, 0, "mercurio");
-        this.venus = new Planet(.95, "/img/Venus.jpeg", 1.78, 1.6, 0.72, 0 ,0, "venus");
-        this.tierra = new Planet(1, "/img/Earth.jpeg", 1, 1, 1, 0, 0, "tierra");
-        this.marte = new Planet(.533, "SistemaSolarGraficas/img/Mars.jpeg", 0.8082, 0.53, 1.52, 0 ,0, "marte");
-        this.jupiter = new Planet(11.21, "/img/Jupiter.jpeg", 0.439, 0.084, 5.20, 0 ,0, "jupiter");
-        this.saturno = new Saturn(8.52, "/img/Saturn.jpeg", .3254, 0.034, 9.58, 0 ,0, "saturno");
-        this.urano = new Planet(4, "/img/Uranus.jpeg", .229, 0.012, 19.14, 0 ,0, "urano");
+        this.sol = new Planet(109, "./img/Sun.jpeg", 0.03333, 0, 0, 0, 0, "sol");
+        this.mercurio = new Planet(0.383, "./img/Mercury.jpeg", 1.6, 4.14, 0.38, 0, 0, "mercurio");
+        this.venus = new Planet(.95, "./img/Venus.jpeg", 1.78, 1.6, 0.72, 0 ,0, "venus");
+        this.tierra = new Planet(1, "./img/Earth.jpeg", 1, 1, 1, 0, 0, "tierra");
+        this.marte = new Planet(.533, "./img/Mars.jpeg", 0.8082, 0.53, 1.52, 0 ,0, "marte");
+        this.jupiter = new Planet(11.21, "./img/Jupiter.jpeg", 0.439, 0.084, 5.20, 0 ,0, "jupiter");
+        this.saturno = new Saturn(8.52, "./img/Saturn.jpeg", .3254, 0.034, 9.58, 0 ,0, "saturno");
+        this.urano = new Planet(4, "./img/Uranus.jpeg", .229, 0.012, 19.14, 0 ,0, "urano");
 
         //Neptuno la distancia real debería de ser 30.20 pero se sale del skybox
-        this.neptuno = new Planet(3.88, "/img/Neptune.jpeg", .1823, 0.006, 20.20, 0 ,0, "neptuno");
+        this.neptuno = new Planet(3.88, "./img/Neptune.jpeg", .1823, 0.006, 20.20, 0 ,0, "neptuno");
 
         this.add(this.sol);
         this.add(this.mercurio);
@@ -172,7 +172,7 @@ class Saturn extends Composite{
 
 
         const loader = new THREE.TextureLoader();
-        loader.load('../img/Saturn Ring.jpeg', (texture) => {
+        loader.load('./img/Saturn Ring.jpeg', (texture) => {
             rm = new THREE.MeshStandardMaterial({
                 map: texture,
             });
@@ -183,7 +183,7 @@ class Saturn extends Composite{
             this.add(this.ring);
         });
         const loader3 = new THREE.TextureLoader();
-        loader3.load('../img/Saturn Ring.jpeg', (texture) => {
+        loader3.load('./img/Saturn Ring.jpeg', (texture) => {
             rm = new THREE.MeshStandardMaterial({
                 map: texture,
             });
@@ -194,7 +194,7 @@ class Saturn extends Composite{
             this.add(this.ring2);
         });
         const loader4 = new THREE.TextureLoader();
-        loader4.load('../img/Saturn Ring.jpeg', (texture) => {
+        loader4.load('./img/Saturn Ring.jpeg', (texture) => {
             rm = new THREE.MeshStandardMaterial({
                 map: texture,
             });
